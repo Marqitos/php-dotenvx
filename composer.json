@@ -1,0 +1,23 @@
+{
+    "name": "rodas/dotenvx",
+    "description": "Dotenvx encryption for PHP",
+    "type": "library",
+    "keywords": ["dotenv", "dotenvx"],
+    "license": "BSD-3-Clause",
+    "autoload": {
+        "psr-4": {
+            "Rodas\\Dotenvx\\": "src/Dotenvx/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Marcos Porto Mariño",
+            "email": "php@marcospor.to"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "php": ">=8.4",
+        "vlucas/phpdotenv": "^5.6"
+    }
+}
