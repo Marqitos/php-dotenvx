@@ -5,6 +5,8 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
+ * @package Rodas\Doventx
+ * @subpackage Test
  * @copyright 2025 Marcos Porto <php@marcospor.to>
  * @license https://opensource.org/license/bsd-3-clause BSD-3-Clause
  * @link https://marcospor.to/repositories/dotenvx
@@ -32,6 +34,7 @@ class ArrayMultiAdapterTest extends TestCase {
         $this->assertTrue(isset($values['APP']));
         $this->assertTrue(isset($values['APP']['DB']));
         $this->assertTrue(isset($values['APP']['DB']['HOST']));
+        $this->assertEquals('localhost', $values['APP']['DB']['HOST']);
     }
 
     public function testWriteRead() {
@@ -48,12 +51,13 @@ class ArrayMultiAdapterTest extends TestCase {
         $this->assertTrue(isset($values['APP']));
         $this->assertTrue(isset($values['APP']['DB']));
         $this->assertTrue(isset($values['APP']['DB']['HOST']));
+        $this->assertEquals('localhost', $values['APP']['DB']['HOST']);
 
         // Modification test
         $values         = $adapter->values;
         $values['APP']  = 'modified';
         $app            = $adapter->read('APP');
-        $this->assertNotEquals('modified', $app->get());
+        $this->assertNotEquals('modified', $app->isEmpty());
     }
 
     public function testCreate() {
