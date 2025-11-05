@@ -48,6 +48,12 @@ class ArrayMultiAdapterTest extends TestCase {
         $this->assertTrue(isset($values['APP']));
         $this->assertTrue(isset($values['APP']['DB']));
         $this->assertTrue(isset($values['APP']['DB']['HOST']));
+
+        // Modification test
+        $values         = $adapter->values;
+        $values['APP']  = 'modified';
+        $app            = $adapter->read('APP');
+        $this->assertNotEquals('modified', $app->get());
     }
 
     public function testCreate() {

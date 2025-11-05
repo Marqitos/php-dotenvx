@@ -60,7 +60,7 @@ class ArrayMultiAdapter implements AdapterInterface {
      * @var array<string, mixed>
      */
     public array $values {
-        get => array_merge_recursive($this->variables);
+        get => $this->variables;
     }
 # -- Properties
 
