@@ -25,12 +25,22 @@ use function explode;
  * Read or write de values on a multilevel array
  */
 class ArrayMultiAdapter implements AdapterInterface {
+# Fields
     /**
      * The variables and their values.
      *
      * @var array<string, mixed>
      */
     private array $variables;
+    /**
+     * Key to array level separator, for use with self::create()
+     *
+     * @var string
+     */
+    public static string $defaultSeparator = '.';
+# -- Fields
+
+# Properties
     /**
      * Char to split the name into keys
      *
@@ -52,11 +62,13 @@ class ArrayMultiAdapter implements AdapterInterface {
     public array $values {
         get => array_merge_recursive($this->variables);
     }
+# -- Properties
 
-    public static string $defaultSeparator = '.';
-
+# Constructor
     /**
      * Create a new array adapter instance.
+     *
+     * @param string $separator Key to array level separator
      */
     public function __construct(string $separator) {
         $this->variables = [];
@@ -65,7 +77,9 @@ class ArrayMultiAdapter implements AdapterInterface {
         }
         $this->separator = $separator;
     }
+# -- Constructor
 
+# Methods
     /**
      * Create a new instance of the adapter.
      *
@@ -85,7 +99,7 @@ class ArrayMultiAdapter implements AdapterInterface {
      */
     public function read(string $name) {
         $parts = explode($this->separator, $name);
-        
+
         if (empty($parts)) {
             return None::create();
         }
@@ -103,7 +117,7 @@ class ArrayMultiAdapter implements AdapterInterface {
     }
 
     /**
-     * Write to an environment variable, if possible.
+     * Write a value to a multilevel array.
      *
      * @param non-empty-string $name
      * @param string           $value
@@ -112,10 +126,15 @@ class ArrayMultiAdapter implements AdapterInterface {
      */
     public function write(string $name, string $value) {
         $parts = explode($this->separator, $name);
+        $count = count($parts);
 
-        $array = $this->variables;
+        $depth = 0;
+        $array = &$this->variables;
         foreach ($parts as $key) {
-            if (!isset($array[$key])) {
+            $depth++;
+            if ($depth === $count) {
+                $array[$key] = $value;
+            } elseif (!isset($array[$key])) {
                 $array[$key] = [];
             }
 
@@ -126,7 +145,7 @@ class ArrayMultiAdapter implements AdapterInterface {
     }
 
     /**
-     * Delete an environment variable, if possible.
+     * Delete a value or branch from a multilevel array.
      *
      * @param non-empty-string $name
      *
@@ -137,7 +156,7 @@ class ArrayMultiAdapter implements AdapterInterface {
         $count = count($parts);
 
         $depth = 0;
-        $array = $this->variables;
+        $array = &$this->variables;
         foreach ($parts as $key) {
             $depth++;
             if (!isset($array[$key])) {
@@ -151,5 +170,5 @@ class ArrayMultiAdapter implements AdapterInterface {
 
         return true;
     }
+# -- Methods
 }
-

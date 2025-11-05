@@ -18,6 +18,7 @@ use Exception;
 use RuntimeException;
 
 use function function_exists;
+use function sodium_base642bin;
 use function sodium_bin2base64;
 use function sodium_crypto_box_keypair;
 use function sodium_crypto_box_keypair_from_secretkey_and_publickey;
@@ -28,20 +29,29 @@ use function sodium_crypto_box_secretkey;
 
 use const SODIUM_BASE64_VARIANT_ORIGINAL;
 
+/**
+ * Provide Montgomery curve, Curve25519, encryption functions. (Usually abbreviated as X25519)
+ */
 class Decryptor {
     private function __construct() {
         // Is a Singleton class
     }
 
+    /**
+     * Return a private key and a public key pair of X25519 in base64
+     *
+     * @return array<string>    [privateKey, publicKey] Keys base64 encoded.
+     * @throws RuntimeException If the Sodium extension is not available, and the polyfill can't be loaded.
+     */
     public static function createKeyPair() {
         if (function_exists('sodium_bin2base64') &&
             function_exists('sodium_crypto_box_keypair') &&
             function_exists('sodium_crypto_box_publickey') &&
             function_exists('sodium_crypto_box_secretkey')) {
 
-            $keypair = sodium_crypto_box_keypair();
-            $privateKey = sodium_crypto_box_secretkey($keypair);
-            $publicKey  = sodium_crypto_box_publickey($keypair);
+            $keyPair = sodium_crypto_box_keypair();
+            $privateKey = sodium_crypto_box_secretkey($keyPair);
+            $publicKey  = sodium_crypto_box_publickey($keyPair);
             return [
                 sodium_bin2base64($privateKey, SODIUM_BASE64_VARIANT_ORIGINAL),
                 sodium_bin2base64($publicKey, SODIUM_BASE64_VARIANT_ORIGINAL)
@@ -83,19 +93,32 @@ class Decryptor {
         throw new RuntimeException("Sodium extension needed");
     }
 
-    public static function crypto_base64_encode(string $string) {
+    /**
+     * Converts a raw binary string into a base64-encoded string (constant-time mode).
+     *
+     * @param  string $string   Decoded/raw binary string.
+     * @return string           Base64 string.
+     * @throws RuntimeException If the Sodium extension is not available, and the polyfill can't be loaded.
+     */
+    public static function cryptoBase64Encode(string $string) {
         if (!function_exists('sodium_bin2base64')) {
             throw new RuntimeException("Sodium extension needed");
         }
         return sodium_bin2base64($string, SODIUM_BASE64_VARIANT_ORIGINAL);
     }
 
-    public static function crypto_base64_decode(string $string) {
+    /**
+     * Converts a base64 encoded string into raw binary (constant-time mode).
+     *
+     * @param  string $string   Base64 string.
+     * @return string           Decoded/raw binary string.
+     * @throws RuntimeException If the Sodium extension is not available, and the polyfill can't be loaded.
+     */
+    public static function cryptoBase64Decode(string $string) {
         if (!function_exists('sodium_base642bin')) {
             throw new RuntimeException("Sodium extension needed");
         }
         return sodium_base642bin($string, SODIUM_BASE64_VARIANT_ORIGINAL);
     }
-
     
 }

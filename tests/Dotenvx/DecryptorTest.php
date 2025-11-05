@@ -50,19 +50,45 @@ class DecryptorTest extends TestCase {
     }
 
     /**
-     * Test Decryptor::crypto_base64_encode and crypto_base64_decode
+     * Test Decryptor::cryptoBase64Encode and cryptoBase64Decode
      *
-     * @covers Rodas\Dotenvx\Decryptor::crypto_base64_encode
-     * @covers Rodas\Dotenvx\Decryptor::crypto_base64_decode
+     * @covers Rodas\Dotenvx\Decryptor::cryptoBase64Encode
+     * @covers Rodas\Dotenvx\Decryptor::cryptoBase64Decode
      */
     public function testBase64() {
-        $initialText = 'textToEncode:123456789:$ç=*';
-        $base64 = Decryptor::crypto_base64_encode($initialText);
+        $initialText = 'textToEncode:123456789+$ç=*';
+        $base64 = Decryptor::cryptoBase64Encode($initialText);
         $isBase64 = preg_match(self::BASE64_REGEX, $base64) === 1;
-        $finalText = Decryptor::crypto_base64_decode($base64);
+        $finalText = Decryptor::cryptoBase64Decode($base64);
+
+        $this->assertEquals($initialText, $finalText);
+        $this->assertNotEmpty($base64);
+        $this->assertTrue($isBase64);
+    }
+
+    /**
+     * Test Decryptor::encrypt and encrypt
+     *
+     * @covers Rodas\Dotenvx\Decryptor::createKeyPair
+     * @covers Rodas\Dotenvx\Decryptor::encrypt
+     * @covers Rodas\Dotenvx\Decryptor::decrypt
+     */
+    public function testEncrypt() {
+        $initialValue = "https://encryptor.marcospor.to";
+        // Create key pairs
+        list($privateKey, $publicKey) = Decryptor::createKeyPair();
+        // Encrypt
+        $encryptedValue = Decryptor::encrypt($initialValue, $publicKey);
+        $encrypted      = substr($encryptedValue, 10);
+        $isBase64       = preg_match(self::BASE64_REGEX, $encrypted) === 1;
+        $isEncrypted    = substr($encryptedValue, 0, 10) === 'encrypted:' &&
+            $isBase64;
+        // Decrypt
+        $finalValue     = Decryptor::decrypt($encryptedValue, $privateKey, $publicKey);
 
         $this->assertTrue($isBase64);
-        $this->assertEquals($initialText, $finalText);
+        $this->assertTrue($isEncrypted);
+        $this->assertEquals($initialValue, $finalValue);
     }
 
 }
