@@ -12,7 +12,7 @@
 
 declare(strict_types=1);
 
-namespace Rodas\Dotenvx;
+namespace Rodas\Dotenvx\Provider;
 
 /**
  * Store the public and private keys necessary for decrypting values.

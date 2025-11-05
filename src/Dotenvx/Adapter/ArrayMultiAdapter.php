@@ -15,8 +15,9 @@ declare(strict_types=1);
 namespace Rodas\Dotenvx\Adapter;
 
 use Dotenv\Repository\Adapter\AdapterInterface;
-use PhpOption\Option;
-use PhpOption\Some;
+use PhpOption\{ None, Option, Some};
+
+use function array_merge_recursive;
 use function count;
 use function explode;
 
@@ -27,21 +28,41 @@ class ArrayMultiAdapter implements AdapterInterface {
     /**
      * The variables and their values.
      *
-     * @var array<string, string>
+     * @var array<string, mixed>
      */
     private array $variables;
-
-    private string $separator;
+    /**
+     * Char to split the name into keys
+     *
+     * @var string
+     */
+    public private(set) string $separator {
+        get => $this->separator;
+        set (string $value) {
+            if (!empty($value)) {
+                $this->separator = $value;
+            }
+        }
+    }
+    /**
+     * Gets de stored values
+     *
+     * @var array<string, mixed>
+     */
+    public array $values {
+        get => array_merge_recursive($this->variables);
+    }
 
     public static string $defaultSeparator = '.';
 
     /**
      * Create a new array adapter instance.
-     *
-     * @return void
      */
-    private function __construct(string $separator) {
+    public function __construct(string $separator) {
         $this->variables = [];
+        if (empty($separator)) {
+            $separator = self::$defaultSeparator;
+        }
         $this->separator = $separator;
     }
 
@@ -50,7 +71,7 @@ class ArrayMultiAdapter implements AdapterInterface {
      *
      * @return \PhpOption\Option<\Dotenv\Repository\Adapter\AdapterInterface>
      */
-    public static function create() {
+    public static function create(): Some {
         /** @var \PhpOption\Option<AdapterInterface> */
         return Some::create(new self(self::$defaultSeparator));
     }
@@ -64,11 +85,15 @@ class ArrayMultiAdapter implements AdapterInterface {
      */
     public function read(string $name) {
         $parts = explode($this->separator, $name);
+        
+        if (empty($parts)) {
+            return None::create();
+        }
 
         $value = $this->variables;
         foreach ($parts as $key) {
             if (!isset($value[$key])) {
-                Option::none();
+                return None::create();
             }
 
             $value = $value[$key];

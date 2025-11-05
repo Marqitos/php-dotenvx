@@ -4,11 +4,6 @@
     "type": "library",
     "keywords": ["dotenv", "dotenvx"],
     "license": "BSD-3-Clause",
-    "autoload": {
-        "psr-4": {
-            "Rodas\\Dotenvx\\": "src/Dotenvx/"
-        }
-    },
     "authors": [
         {
             "name": "Marcos Porto Mariño",
@@ -18,6 +13,45 @@
     "minimum-stability": "stable",
     "require": {
         "php": ">=8.4",
+        "paragonie/sodium_compat": "^2.4",
         "vlucas/phpdotenv": "^5.6"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^12.4",
+        "phpunit/php-code-coverage": "^12.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Rodas\\Dotenvx\\": "src/Dotenvx/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Rodas\\Test\\Dotenvx\\": "tests/Dotenvx/"
+        }
+    },    
+    "config": {
+        "sort-packages": true
+    },    
+    "scripts": {
+        "dev:build:clean": "git clean -fX build/",
+        "dev:lint": [
+            "@dev:lint:syntax"
+        ],        
+        "dev:lint:syntax": "parallel-lint --colors src/",
+        "dev:test": [
+            "@dev:lint",
+            "@dev:test:unit"
+        ],
+        "dev:test:unit": "phpunit --colors=always",
+        "test": "@dev:test"
+    },
+    "scripts-descriptions": {
+        "dev:build:clean": "Cleans the build/ directory.",
+        "dev:lint": "Runs all linting checks.",
+        "dev:lint:syntax": "Checks for syntax errors.",
+        "dev:test": "Runs linting and static analysis.",
+        "dev:test:unit": "Runs unit tests.",
+        "test": "Runs linting and static analysis."
     }
 }
