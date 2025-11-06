@@ -66,6 +66,6 @@ class ArrayMultiAdapterTest extends TestCase {
         ArrayMultiAdapter::$defaultSeparator = '.';
         $separator = $adapter->separator;
 
-        $this->assertEquals($separator, '-');
+        $this->assertEquals('-', $separator);
     }
 }

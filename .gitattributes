@@ -24,7 +24,9 @@
 # Release excludes
 /.gitignore             export-ignore
 /.gitattributes         export-ignore
+/.markdownlint.json     export-ignore
 /build/                 export-ignore
+/docs/                  export-ignore
 /tests/                 export-ignore
 /phpunit.xml            export-ignore
 /phpcs.xml              export-ignore
