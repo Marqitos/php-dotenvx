@@ -25,6 +25,7 @@
 /.gitignore             export-ignore
 /.gitattributes         export-ignore
 /.markdownlint.json     export-ignore
+/.github/               export-ignore
 /build/                 export-ignore
 /docs/                  export-ignore
 /tests/                 export-ignore
