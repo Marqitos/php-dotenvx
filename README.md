@@ -21,6 +21,7 @@ environment.
 [![Run unit tests (PHPUnit)](https://github.com/Marqitos/php-dotenvx/actions/workflows/test-unit.yml/badge.svg)](https://github.com/Marqitos/php-dotenvx/actions/workflows/test-unit.yml)
 
 ![dotvenx](https://github.com/Marqitos/php-dotenvx/blob/main/docs/dotenvx-cover.svg)
+
 </div>
 
 This library also provides an adapter to dump the `.env` values ​​into
