@@ -48,7 +48,6 @@ class ArrayMultiAdapter implements AdapterInterface {
      * @var string
      */
     public private(set) string $separator {
-        get => $this->separator;
         set (string $value) {
             if (!empty($value)) {
                 $this->separator = $value;
