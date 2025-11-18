@@ -1,0 +1,3 @@
+Name: phpoption/phpoption
+Commit: 638a154f8d4ee6a5cfa96d6a34dfbe0cffa9566d
+Version: 1.9.4
