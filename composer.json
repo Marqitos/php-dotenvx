@@ -13,6 +13,7 @@
     "minimum-stability": "stable",
     "require": {
         "php": ">=8.4",
+        "ext-sodium": "*",
         "paragonie/sodium_compat": "^2.4",
         "vlucas/phpdotenv": "^5.6"
     },
