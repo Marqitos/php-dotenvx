@@ -9,48 +9,26 @@ use Closure;
 class ComposerStaticInit {
     public static $files = [
         '6124b4c8570aa390c21fafd04a26c69f' => __DIR__ . '/../vendor' . '/myclabs/deep-copy/src/DeepCopy/deep_copy.php',
-        '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/../vendor' . '/symfony/polyfill-ctype/bootstrap.php',
-        '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/../vendor' . '/symfony/polyfill-mbstring/bootstrap.php',
-        'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/../vendor' . '/symfony/polyfill-php80/bootstrap.php',
         'ec07570ca5a812141189b1fa81503674' => __DIR__ . '/../vendor' . '/phpunit/phpunit/src/Framework/Assert/Functions.php',
     ];
 
     public static $prefixLengthsPsr4 = [
-        'S' => [
-            'Symfony\\Polyfill\\Php80\\' => 23,
-            'Symfony\\Polyfill\\Mbstring\\' => 26,
-            'Symfony\\Polyfill\\Ctype\\' => 23
-        ],
         'R' => [
             'Rodas\\Test\\Dotenvx\\' => 19,
             'Rodas\\Dotenvx\\' => 14
         ],
-        'P' => [
-            'PhpParser\\' => 10,
-            'PhpOption\\' => 10
-        ],
-        'G' => ['GrahamCampbell\\ResultType\\' => 26],
-        'D' => [
-            'Dotenv\\' => 7,
-            'DeepCopy\\' => 9
-        ]
+        'P' => ['PhpParser\\' => 10],
+        'D' => ['DeepCopy\\' => 9]
     ];
 
     public static $prefixDirsPsr4 = [
-        'Symfony\\Polyfill\\Php80\\'    => [__DIR__ . '/../vendor' . '/symfony/polyfill-php80'],
-        'Symfony\\Polyfill\\Mbstring\\' => [__DIR__ . '/../vendor' . '/symfony/polyfill-mbstring'],
-        'Symfony\\Polyfill\\Ctype\\'    => [__DIR__ . '/../vendor' . '/symfony/polyfill-ctype'],
-        'Rodas\\Dotenvx\\'              => [__DIR__ . '/..' . '/src/Dotenvx'],
+        'Rodas\\Dotenvx\\'              => [__DIR__ . '/..' . '/src/Rodas/Dotenvx'],
         'Rodas\\Test\\Dotenvx\\'        => [__DIR__ . '/..' . '/tests/Dotenvx'],
         'PhpParser\\'                   => [__DIR__ . '/../vendor' . '/nikic/php-parser/lib/PhpParser'],
-        'PhpOption\\'                   => [__DIR__ . '/../vendor' . '/phpoption/phpoption/src/PhpOption'],
-        'GrahamCampbell\\ResultType\\'  => [__DIR__ . '/../vendor' . '/graham-campbell/result-type/src'],
-        'Dotenv\\'                      => [__DIR__ . '/../vendor' . '/vlucas/phpdotenv/src'],
         'DeepCopy\\'                    => [__DIR__ . '/../vendor' . '/myclabs/deep-copy/src/DeepCopy']
     ];
 
     public static $classMap = [
-        'Attribute' => __DIR__ . '/../vendor' . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
         'Composer\\InstalledVersions' => __DIR__ . '/../vendor' . '/composer/InstalledVersions.php',
         'PHPUnit\\Event\\Application\\Finished' => __DIR__ . '/../vendor' . '/phpunit/phpunit/src/Event/Events/Application/Finished.php',
         'PHPUnit\\Event\\Application\\FinishedSubscriber' => __DIR__ . '/../vendor' . '/phpunit/phpunit/src/Event/Events/Application/FinishedSubscriber.php',
@@ -1115,7 +1093,6 @@ class ComposerStaticInit {
         'PharIo\\Version\\VersionConstraintParser' => __DIR__ . '/../vendor' . '/phar-io/version/src/VersionConstraintParser.php',
         'PharIo\\Version\\VersionConstraintValue' => __DIR__ . '/../vendor' . '/phar-io/version/src/VersionConstraintValue.php',
         'PharIo\\Version\\VersionNumber' => __DIR__ . '/../vendor' . '/phar-io/version/src/VersionNumber.php',
-        'PhpToken' => __DIR__ . '/../vendor' . '/symfony/polyfill-php80/Resources/stubs/PhpToken.php',
         'SebastianBergmann\\CliParser\\AmbiguousOptionException' => __DIR__ . '/../vendor' . '/sebastian/cli-parser/src/exceptions/AmbiguousOptionException.php',
         'SebastianBergmann\\CliParser\\Exception' => __DIR__ . '/../vendor' . '/sebastian/cli-parser/src/exceptions/Exception.php',
         'SebastianBergmann\\CliParser\\OptionDoesNotAllowArgumentException' => __DIR__ . '/../vendor' . '/sebastian/cli-parser/src/exceptions/OptionDoesNotAllowArgumentException.php',
@@ -1333,7 +1310,6 @@ class ComposerStaticInit {
         'SebastianBergmann\\Type\\UnknownType' => __DIR__ . '/../vendor' . '/sebastian/type/src/type/UnknownType.php',
         'SebastianBergmann\\Type\\VoidType' => __DIR__ . '/../vendor' . '/sebastian/type/src/type/VoidType.php',
         'SebastianBergmann\\Version' => __DIR__ . '/../vendor' . '/sebastian/version/src/Version.php',
-        'Stringable' => __DIR__ . '/../vendor' . '/symfony/polyfill-php80/Resources/stubs/Stringable.php',
         'TheSeer\\Tokenizer\\Exception' => __DIR__ . '/../vendor' . '/theseer/tokenizer/src/Exception.php',
         'TheSeer\\Tokenizer\\NamespaceUri' => __DIR__ . '/../vendor' . '/theseer/tokenizer/src/NamespaceUri.php',
         'TheSeer\\Tokenizer\\NamespaceUriException' => __DIR__ . '/../vendor' . '/theseer/tokenizer/src/NamespaceUriException.php',
@@ -1342,8 +1318,6 @@ class ComposerStaticInit {
         'TheSeer\\Tokenizer\\TokenCollectionException' => __DIR__ . '/../vendor' . '/theseer/tokenizer/src/TokenCollectionException.php',
         'TheSeer\\Tokenizer\\Tokenizer' => __DIR__ . '/../vendor' . '/theseer/tokenizer/src/Tokenizer.php',
         'TheSeer\\Tokenizer\\XMLSerializer' => __DIR__ . '/../vendor' . '/theseer/tokenizer/src/XMLSerializer.php',
-        'UnhandledMatchError' => __DIR__ . '/../vendor' . '/symfony/polyfill-php80/Resources/stubs/UnhandledMatchError.php',
-        'ValueError' => __DIR__ . '/../vendor' . '/symfony/polyfill-php80/Resources/stubs/ValueError.php',
         'staabm\\SideEffectsDetector\\SideEffect' => __DIR__ . '/../vendor' . '/staabm/side-effects-detector/lib/SideEffect.php',
         'staabm\\SideEffectsDetector\\SideEffectsDetector' => __DIR__ . '/../vendor' . '/staabm/side-effects-detector/lib/SideEffectsDetector.php'
     ];
