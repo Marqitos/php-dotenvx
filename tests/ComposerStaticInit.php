@@ -13,16 +13,12 @@ class ComposerStaticInit {
     ];
 
     public static $prefixLengthsPsr4 = [
-        'R' => [
-            'Rodas\\Test\\Dotenvx\\' => 19,
-            'Rodas\\Dotenvx\\' => 14
-        ],
+        'R' => ['Rodas\\Test\\Dotenvx\\' => 19],
         'P' => ['PhpParser\\' => 10],
         'D' => ['DeepCopy\\' => 9]
     ];
 
     public static $prefixDirsPsr4 = [
-        'Rodas\\Dotenvx\\'              => [__DIR__ . '/..' . '/src/Rodas/Dotenvx'],
         'Rodas\\Test\\Dotenvx\\'        => [__DIR__ . '/..' . '/tests/Dotenvx'],
         'PhpParser\\'                   => [__DIR__ . '/../vendor' . '/nikic/php-parser/lib/PhpParser'],
         'DeepCopy\\'                    => [__DIR__ . '/../vendor' . '/myclabs/deep-copy/src/DeepCopy']
