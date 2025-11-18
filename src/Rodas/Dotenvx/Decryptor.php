@@ -30,6 +30,20 @@ use function sodium_crypto_box_secretkey;
 
 use const SODIUM_BASE64_VARIANT_ORIGINAL;
 
+if (!is_callable('sodium_base642bin') ||
+    !is_callable('sodium_bin2base64') ||
+    !is_callable('sodium_crypto_box_keypair') ||
+    !is_callable('sodium_crypto_box_keypair_from_secretkey_and_publickey') ||
+    !is_callable('sodium_crypto_box_publickey') ||
+    !is_callable('sodium_crypto_box_seal') ||
+    !is_callable('sodium_crypto_box_seal_open') ||
+    !is_callable('sodium_crypto_box_secretkey') ||
+    !defined("SODIUM_BASE64_VARIANT_ORIGINAL")) {
+    
+    // Load polyfills
+    require_once 'ParagonIE/Sodium/php72compat.php';
+}
+
 /**
  * Provide Montgomery curve, Curve25519, encryption functions. (Usually abbreviated as X25519)
  */
@@ -45,53 +59,34 @@ class Decryptor {
      * @throws RuntimeException If the Sodium extension is not available, and the polyfill can't be loaded.
      */
     public static function createKeyPair() {
-        if (function_exists('sodium_bin2base64') &&
-            function_exists('sodium_crypto_box_keypair') &&
-            function_exists('sodium_crypto_box_publickey') &&
-            function_exists('sodium_crypto_box_secretkey')) {
-
-            $keyPair = sodium_crypto_box_keypair();
-            $privateKey = sodium_crypto_box_secretkey($keyPair);
-            $publicKey  = sodium_crypto_box_publickey($keyPair);
-            return [
-                sodium_bin2base64($privateKey, SODIUM_BASE64_VARIANT_ORIGINAL),
-                sodium_bin2base64($publicKey, SODIUM_BASE64_VARIANT_ORIGINAL)
-            ];
-        }
-        throw new RuntimeException("Sodium extension needed");
+        $keyPair = sodium_crypto_box_keypair();
+        $privateKey = sodium_crypto_box_secretkey($keyPair);
+        $publicKey  = sodium_crypto_box_publickey($keyPair);
+        return [
+            sodium_bin2base64($privateKey, SODIUM_BASE64_VARIANT_ORIGINAL),
+            sodium_bin2base64($publicKey, SODIUM_BASE64_VARIANT_ORIGINAL)
+        ];
     }
 
     public static function decrypt(string $encryptedValue, #[SensitiveParameter] string $privateKey, string $publicKey): string {
         if (substr($encryptedValue, 0, 10) == 'encrypted:') {
-            if (function_exists('sodium_base642bin') &&
-                function_exists('sodium_crypto_box_keypair_from_secretkey_and_publickey') &&
-                function_exists('sodium_crypto_box_seal_open')) {
-
-                $cipherText     = base64_decode(substr($encryptedValue, 10));
-                $privateKeyBin  = sodium_base642bin($privateKey,    SODIUM_BASE64_VARIANT_ORIGINAL);
-                $publicKeyBin   = sodium_base642bin($publicKey,     SODIUM_BASE64_VARIANT_ORIGINAL);
-                $keyPair        = sodium_crypto_box_keypair_from_secretkey_and_publickey($privateKeyBin, $publicKeyBin);
-                $plaintext      = sodium_crypto_box_seal_open($cipherText, $keyPair);
-                if ($plaintext === false) {
-                    throw new Exception("Desencriptado fallido");
-                }
-                return $plaintext;
+            $cipherText     = base64_decode(substr($encryptedValue, 10));
+            $privateKeyBin  = sodium_base642bin($privateKey,    SODIUM_BASE64_VARIANT_ORIGINAL);
+            $publicKeyBin   = sodium_base642bin($publicKey,     SODIUM_BASE64_VARIANT_ORIGINAL);
+            $keyPair        = sodium_crypto_box_keypair_from_secretkey_and_publickey($privateKeyBin, $publicKeyBin);
+            $plaintext      = sodium_crypto_box_seal_open($cipherText, $keyPair);
+            if ($plaintext === false) {
+                throw new Exception("Desencriptado fallido");
             }
-            throw new RuntimeException("Sodium extension needed");
+            return $plaintext;
         }
         return $encryptedValue;
     }
 
     public static function encrypt(#[SensitiveParameter] string $value, string $publicKey): string {
-        if (function_exists('sodium_base642bin') &&
-            function_exists('sodium_crypto_box_keypair_from_secretkey_and_publickey') &&
-            function_exists('sodium_crypto_box_seal')) {
-
-            $publicKeyBin   = sodium_base642bin($publicKey, SODIUM_BASE64_VARIANT_ORIGINAL);
-            $cipherText     = sodium_crypto_box_seal($value, $publicKeyBin);
-            return 'encrypted:' . base64_encode($cipherText);
-        }
-        throw new RuntimeException("Sodium extension needed");
+        $publicKeyBin   = sodium_base642bin($publicKey, SODIUM_BASE64_VARIANT_ORIGINAL);
+        $cipherText     = sodium_crypto_box_seal($value, $publicKeyBin);
+        return 'encrypted:' . base64_encode($cipherText);
     }
 
     /**
@@ -102,9 +97,6 @@ class Decryptor {
      * @throws RuntimeException If the Sodium extension is not available, and the polyfill can't be loaded.
      */
     public static function cryptoBase64Encode(string $string) {
-        if (!function_exists('sodium_bin2base64')) {
-            throw new RuntimeException("Sodium extension needed");
-        }
         return sodium_bin2base64($string, SODIUM_BASE64_VARIANT_ORIGINAL);
     }
 
@@ -116,9 +108,6 @@ class Decryptor {
      * @throws RuntimeException If the Sodium extension is not available, and the polyfill can't be loaded.
      */
     public static function cryptoBase64Decode(string $string) {
-        if (!function_exists('sodium_base642bin')) {
-            throw new RuntimeException("Sodium extension needed");
-        }
         return sodium_base642bin($string, SODIUM_BASE64_VARIANT_ORIGINAL);
     }
     
