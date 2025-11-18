@@ -22,6 +22,8 @@ use Dotenv\Repository\Adapter\AdapterInterface;
 use PhpOption\Option;
 use PhpOption\Some;
 
+require_once 'Dotenv/Repository/Adapter/AdapterInterface.php';
+
 class ArrayAdapter implements AdapterInterface {
 # Fields
     /**
@@ -59,6 +61,7 @@ class ArrayAdapter implements AdapterInterface {
      * @return \PhpOption\Option<\Dotenv\Repository\Adapter\AdapterInterface>
      */
     public static function create(): Some {
+        require_once 'PhpOption/Some.php';
         /** @var \PhpOption\Option<AdapterInterface> */
         return Some::create(new self());
     }
@@ -71,6 +74,7 @@ class ArrayAdapter implements AdapterInterface {
      * @return \PhpOption\Option<string>
      */
     public function read(string $name) {
+        require_once 'PhpOption/Option.php';
         return Option::fromArraysValue($this->variables, $name);
     }
 

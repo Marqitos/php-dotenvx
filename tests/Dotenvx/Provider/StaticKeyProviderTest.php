@@ -19,6 +19,8 @@ namespace Rodas\Test\Dotenvx\Adapter;
 use PHPUnit\Framework\TestCase;
 use Rodas\Dotenvx\Provider\StaticKeyProvider;
 
+require_once 'Rodas/Dotenvx/Provider/StaticKeyProvider.php';
+
 /**
  * Test class for StaticKeyProvider
  *

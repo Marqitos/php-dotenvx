@@ -19,6 +19,8 @@ namespace Rodas\Test\Dotenvx\Adapter;
 use PHPUnit\Framework\TestCase;
 use Rodas\Dotenvx\Adapter\ArrayAdapter;
 
+require_once 'Rodas/Dotenvx/Adapter/ArrayAdapter.php';
+
 /**
  * Test class for ArrayAdapter
  *
@@ -41,7 +43,7 @@ class ArrayAdapterTest extends TestCase {
         $host       = $adapter->read('APP_DB_HOST');
         $isEmpty    = $host->isEmpty();
         $values     = $adapter->values;
-        
+
         $this->assertFalse($isEmpty);
         if (!$isEmpty) {
             $this->assertEquals('localhost', $host->get());

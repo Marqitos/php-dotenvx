@@ -22,6 +22,8 @@ use function array_merge_recursive;
 use function count;
 use function explode;
 
+require_once 'Dotenv/Repository/Adapter/AdapterInterface.php';
+
 /**
  * Read or write de values on a multilevel array
  */
@@ -86,6 +88,7 @@ class ArrayMultiAdapter implements AdapterInterface {
      * @return \PhpOption\Option<\Dotenv\Repository\Adapter\AdapterInterface>
      */
     public static function create(): Some {
+        require_once 'PhpOption/Some.php';
         /** @var \PhpOption\Option<AdapterInterface> */
         return Some::create(new self(self::$defaultSeparator));
     }
@@ -101,18 +104,21 @@ class ArrayMultiAdapter implements AdapterInterface {
         $parts = explode($this->separator, $name);
 
         if (empty($parts)) {
+            require_once 'PhpOption/None.php';
             return None::create();
         }
 
         $value = $this->variables;
         foreach ($parts as $key) {
             if (!isset($value[$key])) {
+                require_once 'PhpOption/None.php';
                 return None::create();
             }
 
             $value = $value[$key];
         }
 
+        require_once 'PhpOption/Option.php';
         return Option::fromValue($value);
     }
 
