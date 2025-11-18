@@ -19,8 +19,6 @@ namespace Rodas\Test\Dotenvx;
 use PHPUnit\Framework\TestCase;
 use Rodas\Dotenvx\Decryptor;
 
-require_once __DIR__ . '/../../src/Dotenvx/Decryptor.php';
-
 /**
  * Test class for Decryptor
  *
