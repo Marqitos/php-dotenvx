@@ -13,9 +13,9 @@
     "minimum-stability": "stable",
     "require": {
         "php": ">=8.4",
-        "ext-iconv": "*",
         "ext-pcre": "*",
         "paragonie/sodium_compat": "^2.4",
+        "symfony/polyfill-iconv": "^1.33",
         "vlucas/phpdotenv": "^5.6"
     },
     "require-dev": {
@@ -25,6 +25,7 @@
     "suggest": {
         "ext-ctype": "For best performance",
         "ext-filter": "Required to use the boolean validator.",
+        "ext-iconv": "For best performance",
         "ext-mbstring": "For best performance",
         "ext-sodium": "Better performance, password hashing (Argon2i), secure memory management (memzero), and better security."
     },
