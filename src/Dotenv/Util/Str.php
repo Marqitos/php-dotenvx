@@ -8,6 +8,12 @@ use GrahamCampbell\ResultType\Error;
 use GrahamCampbell\ResultType\Success;
 use PhpOption\Option;
 
+use function mb_convert_encoding;
+use function mb_list_encodings;
+use function mb_strlen;
+use function mb_strpos;
+use function mb_substr;
+
 /**
  * @internal
  */
@@ -37,7 +43,10 @@ final class Str
      */
     public static function utf8(string $input, ?string $encoding = null)
     {
-        if ($encoding !== null && !\in_array($encoding, \mb_list_encodings(), true)) {
+        if (!is_callable('mb_list_encodings')) {
+            require_once 'Symfony/Polyfill/Mbstring/bootstrap.php';
+        }
+        if ($encoding !== null && !\in_array($encoding, mb_list_encodings(), true)) {
             require_once self::R_GRAHAM_CAMPBELL_RESULT_TYPE_ERROR;
             /** @var \GrahamCampbell\ResultType\Result<string, string> */
             return Error::create(
@@ -45,9 +54,12 @@ final class Str
             );
         }
 
+        if (!is_callable('mb_convert_encoding')) {
+            require_once 'Symfony/Polyfill/Mbstring/bootstrap.php';
+        }
         $converted = $encoding === null ?
-            @\mb_convert_encoding($input, 'UTF-8') :
-            @\mb_convert_encoding($input, 'UTF-8', $encoding);
+            @mb_convert_encoding($input, 'UTF-8') :
+            @mb_convert_encoding($input, 'UTF-8', $encoding);
 
         if (!is_string($converted)) {
             require_once self::R_GRAHAM_CAMPBELL_RESULT_TYPE_ERROR;
@@ -81,8 +93,11 @@ final class Str
      */
     public static function pos(string $haystack, string $needle)
     {
+        if (!is_callable('mb_strpos')) {
+            require_once 'Symfony/Polyfill/Mbstring/bootstrap.php';
+        }
         /** @var \PhpOption\Option<int> */
-        return Option::fromValue(\mb_strpos($haystack, $needle, 0, 'UTF-8'), false);
+        return Option::fromValue(mb_strpos($haystack, $needle, 0, 'UTF-8'), false);
     }
 
     /**
@@ -96,7 +111,10 @@ final class Str
      */
     public static function substr(string $input, int $start, ?int $length = null)
     {
-        return \mb_substr($input, $start, $length, 'UTF-8');
+        if (!is_callable('mb_substr')) {
+            require_once 'Symfony/Polyfill/Mbstring/bootstrap.php';
+        }
+        return mb_substr($input, $start, $length, 'UTF-8');
     }
 
     /**
@@ -108,6 +126,9 @@ final class Str
      */
     public static function len(string $input)
     {
-        return \mb_strlen($input, 'UTF-8');
+        if (!is_callable('mb_strlen')) {
+            require_once 'Symfony/Polyfill/Mbstring/bootstrap.php';
+        }
+        return mb_strlen($input, 'UTF-8');
     }
 }
