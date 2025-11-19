@@ -18,7 +18,7 @@ environment.
 
 [![BSD 3-Clause License](https://img.shields.io/badge/license-BSD%203--Clause-brightgreen.svg)](https://github.com/Marqitos/php-dotenvx?tab=BSD-3-Clause-1-ov-file)
 [![Latest Version](https://img.shields.io/github/release/marqitos/php-dotenvx.svg)](https://github.com/Marqitos/php-dotenvx/releases)
-[![Run unit tests (PHPUnit)](https://github.com/Marqitos/php-dotenvx/actions/workflows/test-unit.yml/badge.svg)](https://github.com/Marqitos/php-dotenvx/actions/workflows/test-unit.yml)
+[![Run unit tests (PHPUnit)](https://github.com/Marqitos/php-dotenvx/actions/workflows/test-unit.yml/badge.svg?branch=library)](https://github.com/Marqitos/php-dotenvx/actions/workflows/test-unit.yml)
 
 ![dotvenx](https://github.com/Marqitos/php-dotenvx/blob/main/docs/dotenvx-cover.svg)
 
@@ -26,3 +26,8 @@ environment.
 
 This library also provides an adapter to dump the `.env` values ​​into
 an array and a multi-level array.
+
+---
+
+This branch provides loading classes with Scaffold Autoload or only with require,
+and has not composer dependencies.
