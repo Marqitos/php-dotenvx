@@ -10,6 +10,9 @@ use GrahamCampbell\ResultType\Error;
 use GrahamCampbell\ResultType\Result;
 use GrahamCampbell\ResultType\Success;
 
+use function ctype_space;
+use function is_callable;
+
 final class EntryParser
 {
     const R_DOTENV_UTIL_STR                     = __DIR__ . '/../Util/Str.php';
@@ -107,7 +110,10 @@ final class EntryParser
     private static function parseName(string $name)
     {
         require_once self::R_DOTENV_UTIL_STR;
-        if (Str::len($name) > 8 && Str::substr($name, 0, 6) === 'export' && \ctype_space(Str::substr($name, 6, 1))) {
+        if (!is_callable('ctype_space')) {
+            require_once 'Symfony/Polyfill/Ctype/bootstrap.php';
+        }
+        if (Str::len($name) > 8 && Str::substr($name, 0, 6) === 'export' && ctype_space(Str::substr($name, 6, 1))) {
             $name = \ltrim(Str::substr($name, 6));
         }
 
@@ -236,10 +242,13 @@ final class EntryParser
                 }
             case self::UNQUOTED_STATE:
                 require_once self::R_GRAHAM_CAMPBELL_RESULT_TYPE_SUCCESS;
+                if (!is_callable('ctype_space')) {
+                    require_once 'Symfony/Polyfill/Ctype/bootstrap.php';
+                }
                 if ($token === '#') {
                     /** @var \GrahamCampbell\ResultType\Result<array{string, bool, int}, string> */
                     return Success::create(['', false, self::COMMENT_STATE]);
-                } elseif (\ctype_space($token)) {
+                } elseif (ctype_space($token)) {
                     /** @var \GrahamCampbell\ResultType\Result<array{string, bool, int}, string> */
                     return Success::create(['', false, self::WHITESPACE_STATE]);
                 } elseif ($token === '$') {
@@ -296,11 +305,14 @@ final class EntryParser
                     }
                 }
             case self::WHITESPACE_STATE:
+                if (!is_callable('ctype_space')) {
+                    require_once 'Symfony/Polyfill/Ctype/bootstrap.php';
+                }
                 if ($token === '#') {
                     require_once self::R_GRAHAM_CAMPBELL_RESULT_TYPE_SUCCESS;
                     /** @var \GrahamCampbell\ResultType\Result<array{string, bool, int}, string> */
                     return Success::create(['', false, self::COMMENT_STATE]);
-                } elseif (!\ctype_space($token)) {
+                } elseif (!ctype_space($token)) {
                     require_once self::R_GRAHAM_CAMPBELL_RESULT_TYPE_ERROR;
                     /** @var \GrahamCampbell\ResultType\Result<array{string, bool, int}, string> */
                     return Error::create('unexpected whitespace');

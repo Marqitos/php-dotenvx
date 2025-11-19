@@ -1,0 +1,3 @@
+Name: symfony/polyfill-ctype
+Commit: a3cc8b044a6ea513310cbd48ef7333b384945638
+Version: v1.33.0

@@ -9,6 +9,9 @@ use Dotenv\Repository\RepositoryInterface;
 use Dotenv\Util\Regex;
 use Dotenv\Util\Str;
 
+use function ctype_digit;
+use function is_callable;
+
 require_once __DIR__ . '/Repository/RepositoryInterface.php';
 
 class Validator
@@ -87,7 +90,10 @@ class Validator
     {
         return $this->assertNullable(
             static function (string $value) {
-                return \ctype_digit($value);
+                if (!is_callable('ctype_digit')) {
+                    require_once 'Symfony/Polyfill/Ctype/bootstrap.php';
+                }
+                return ctype_digit($value);
             },
             'is not an integer'
         );
