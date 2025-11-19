@@ -1,0 +1,3 @@
+Name: graham-campbell/result-type
+Commit: 3ba905c11371512af9d9bdd27d99b782216b6945
+Version: 1.1.3
