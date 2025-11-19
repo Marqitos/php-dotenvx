@@ -43,7 +43,7 @@ class ArrayMultiAdapterTest extends TestCase {
         $host       = $adapter->read('APP.DB.HOST');
         $isEmpty    = $host->isEmpty();
         $values     = $adapter->values;
-        
+
         $this->assertFalse($isEmpty);
         if (!$isEmpty) {
             $this->assertEquals('localhost', $host->get());

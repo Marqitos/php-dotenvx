@@ -96,5 +96,5 @@ class Decryptor {
     public static function cryptoBase64Decode(string $string) {
         return sodium_base642bin($string, SODIUM_BASE64_VARIANT_ORIGINAL);
     }
-    
+
 }
