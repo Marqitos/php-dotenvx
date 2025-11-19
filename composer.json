@@ -31,15 +31,15 @@
             "Rodas\\Dotenvx\\": "src/Rodas/Dotenvx/",
             "Rodas\\Test\\Dotenvx\\": "tests/Dotenvx/"
         }
-    },    
+    },
     "config": {
         "sort-packages": true
-    },    
+    },
     "scripts": {
         "dev:build:clean": "git clean -fX build/",
         "dev:lint": [
             "@dev:lint:syntax"
-        ],        
+        ],
         "dev:lint:syntax": "parallel-lint --colors src/",
         "dev:test": [
             "@dev:lint",

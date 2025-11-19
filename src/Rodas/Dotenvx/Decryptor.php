@@ -39,7 +39,7 @@ if (!is_callable('sodium_base642bin') ||
     !is_callable('sodium_crypto_box_seal_open') ||
     !is_callable('sodium_crypto_box_secretkey') ||
     !defined("SODIUM_BASE64_VARIANT_ORIGINAL")) {
-    
+
     // Load polyfills
     require_once 'ParagonIE/Sodium/php72compat.php';
 }
@@ -110,5 +110,5 @@ class Decryptor {
     public static function cryptoBase64Decode(string $string) {
         return sodium_base642bin($string, SODIUM_BASE64_VARIANT_ORIGINAL);
     }
-    
+
 }
