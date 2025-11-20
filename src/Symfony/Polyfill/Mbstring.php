@@ -75,6 +75,7 @@ namespace Symfony\Polyfill;
  */
 final class Mbstring
 {
+    const R_ICONV_BOOTSTRAP     = 'Symfony/Polyfill/Iconv/bootstrap.php';
     public const MB_CASE_FOLD = \PHP_INT_MAX;
 
     private const SIMPLE_CASE_FOLD = [
@@ -119,6 +120,7 @@ final class Mbstring
                 $fromEncoding = 'Windows-1252';
             }
             if ('UTF-8' !== $fromEncoding) {
+                require_once R_ICONV_BOOTSTRAP;
                 $s = iconv($fromEncoding, 'UTF-8//IGNORE', $s);
             }
 
@@ -130,6 +132,7 @@ final class Mbstring
             $fromEncoding = 'UTF-8';
         }
 
+        require_once R_ICONV_BOOTSTRAP;
         return iconv($fromEncoding, $toEncoding.'//IGNORE', $s);
     }
 
@@ -147,6 +150,7 @@ final class Mbstring
 
     public static function mb_decode_mimeheader($s)
     {
+        require_once R_ICONV_BOOTSTRAP;
         return iconv_mime_decode($s, 2, self::$internalEncoding);
     }
 
@@ -180,6 +184,7 @@ final class Mbstring
 
         $encoding = self::getEncoding($encoding);
 
+        require_once R_ICONV_BOOTSTRAP;
         if ('UTF-8' === $encoding) {
             $encoding = null;
             if (!preg_match('//u', $s)) {
@@ -246,6 +251,7 @@ final class Mbstring
 
         $encoding = self::getEncoding($encoding);
 
+        require_once R_ICONV_BOOTSTRAP;
         if ('UTF-8' === $encoding) {
             $encoding = null;
             if (!preg_match('//u', $s)) {
@@ -294,6 +300,7 @@ final class Mbstring
 
         $encoding = self::getEncoding($encoding);
 
+        require_once R_ICONV_BOOTSTRAP;
         if ('UTF-8' === $encoding) {
             $encoding = null;
             if (!preg_match('//u', $s)) {
@@ -375,6 +382,7 @@ final class Mbstring
 
         $normalizedEncoding = self::getEncoding($encoding);
 
+        require_once R_ICONV_BOOTSTRAP;
         if ('UTF-8' === $normalizedEncoding || false !== @iconv($normalizedEncoding, $normalizedEncoding, ' ')) {
             self::$internalEncoding = $normalizedEncoding;
 
@@ -434,6 +442,7 @@ final class Mbstring
             $encoding = self::$internalEncoding;
         }
 
+        require_once R_ICONV_BOOTSTRAP;
         if (!\is_array($var)) {
             return self::mb_detect_encoding($var, [$encoding]) || false !== @iconv($encoding, $encoding, $var);
         }
@@ -522,6 +531,7 @@ final class Mbstring
             return \strlen($s);
         }
 
+        require_once R_ICONV_BOOTSTRAP;
         return @iconv_strlen($s, $encoding);
     }
 
@@ -543,6 +553,7 @@ final class Mbstring
             return 0;
         }
 
+        require_once R_ICONV_BOOTSTRAP;
         return iconv_strpos($haystack, $needle, $offset, $encoding);
     }
 
@@ -566,6 +577,7 @@ final class Mbstring
             }
         }
 
+        require_once R_ICONV_BOOTSTRAP;
         $pos = '' !== $needle || 80000 > \PHP_VERSION_ID
             ? iconv_strrpos($haystack, $needle, $encoding)
             : self::mb_strlen($haystack, $encoding);
@@ -651,6 +663,7 @@ final class Mbstring
             return (string) substr($s, $start, null === $length ? 2147483647 : $length);
         }
 
+        require_once R_ICONV_BOOTSTRAP;
         if ($start < 0) {
             $start = iconv_strlen($s, $encoding) + $start;
             if ($start < 0) {
@@ -693,6 +706,7 @@ final class Mbstring
         if ('CP850' === $encoding || 'ASCII' === $encoding) {
             $pos = strrpos($haystack, $needle);
         } else {
+            require_once R_ICONV_BOOTSTRAP;
             $needle = self::mb_substr($needle, 0, 1, $encoding);
             $pos = iconv_strrpos($haystack, $needle, $encoding);
         }
@@ -775,6 +789,7 @@ final class Mbstring
     {
         $encoding = self::getEncoding($encoding);
 
+        require_once R_ICONV_BOOTSTRAP;
         if ('UTF-8' !== $encoding) {
             $s = iconv($encoding, 'UTF-8//IGNORE', $s);
         }
@@ -1001,6 +1016,7 @@ final class Mbstring
             return null === $encoding ? $string : self::mb_convert_encoding($string, $encoding);
         }
 
+        require_once R_ICONV_BOOTSTRAP;
         if ('UTF-8' === $encoding) {
             $encoding = null;
             if (!preg_match('//u', $string)) {
@@ -1029,6 +1045,7 @@ final class Mbstring
             return $string;
         }
 
+        require_once R_ICONV_BOOTSTRAP;
         return iconv('UTF-8', $encoding.'//IGNORE', $string);
     }
 

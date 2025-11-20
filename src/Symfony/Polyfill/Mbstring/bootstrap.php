@@ -18,6 +18,8 @@ if (\PHP_VERSION_ID >= 80000) {
     return require __DIR__.'/bootstrap80.php';
 }
 
+require_once __DIR__ . '/../Mbstring.php';
+
 if (!function_exists('mb_convert_encoding')) {
     function mb_convert_encoding($string, $to_encoding, $from_encoding = null) { return Mbstring::mb_convert_encoding($string, $to_encoding, $from_encoding); }
 }

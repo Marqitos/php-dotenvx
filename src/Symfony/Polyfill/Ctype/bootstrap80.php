@@ -14,6 +14,8 @@
 
 use Symfony\Polyfill\Ctype;
 
+require_once __DIR__ . '/../Ctype.php';
+
 if (!function_exists('ctype_alnum')) {
     function ctype_alnum(mixed $text): bool { return Ctype::ctype_alnum($text); }
 }
