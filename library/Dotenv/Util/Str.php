@@ -20,6 +20,7 @@ use function mb_substr;
 final class Str
 {
     const R_GRAHAM_CAMPBELL_RESULT_TYPE_ERROR   = 'GrahamCampbell/ResultType/Error.php';
+    const R_SYMFONY_POLYFILL_MBSTRING_BOOTSTRAP = 'Symfony/Polyfill/Mbstring/bootstrap.php';
 
     /**
      * This class is a singleton.
@@ -44,7 +45,7 @@ final class Str
     public static function utf8(string $input, ?string $encoding = null)
     {
         if (!is_callable('mb_list_encodings')) {
-            require_once 'Symfony/Polyfill/Mbstring/bootstrap.php';
+            require_once self::R_SYMFONY_POLYFILL_MBSTRING_BOOTSTRAP;
         }
         if ($encoding !== null && !\in_array($encoding, mb_list_encodings(), true)) {
             require_once self::R_GRAHAM_CAMPBELL_RESULT_TYPE_ERROR;
@@ -55,7 +56,7 @@ final class Str
         }
 
         if (!is_callable('mb_convert_encoding')) {
-            require_once 'Symfony/Polyfill/Mbstring/bootstrap.php';
+            require_once self::R_SYMFONY_POLYFILL_MBSTRING_BOOTSTRAP;
         }
         $converted = $encoding === null ?
             @mb_convert_encoding($input, 'UTF-8') :
@@ -94,7 +95,7 @@ final class Str
     public static function pos(string $haystack, string $needle)
     {
         if (!is_callable('mb_strpos')) {
-            require_once 'Symfony/Polyfill/Mbstring/bootstrap.php';
+            require_once self::R_SYMFONY_POLYFILL_MBSTRING_BOOTSTRAP;
         }
         /** @var \PhpOption\Option<int> */
         return Option::fromValue(mb_strpos($haystack, $needle, 0, 'UTF-8'), false);
@@ -112,7 +113,7 @@ final class Str
     public static function substr(string $input, int $start, ?int $length = null)
     {
         if (!is_callable('mb_substr')) {
-            require_once 'Symfony/Polyfill/Mbstring/bootstrap.php';
+            require_once self::R_SYMFONY_POLYFILL_MBSTRING_BOOTSTRAP;
         }
         return mb_substr($input, $start, $length, 'UTF-8');
     }
@@ -127,7 +128,7 @@ final class Str
     public static function len(string $input)
     {
         if (!is_callable('mb_strlen')) {
-            require_once 'Symfony/Polyfill/Mbstring/bootstrap.php';
+            require_once self::R_SYMFONY_POLYFILL_MBSTRING_BOOTSTRAP;
         }
         return mb_strlen($input, 'UTF-8');
     }

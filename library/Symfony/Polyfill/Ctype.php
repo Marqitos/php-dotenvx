@@ -32,7 +32,7 @@ final class Ctype
      *
      * @return bool
      */
-    #[SuppressWarnings(php:S100)]
+    #[SuppressWarnings("php:S100")]
     public static function ctype_alnum($text)
     {
         $text = self::convert_int_to_char_for_ctype($text, __FUNCTION__);
@@ -49,6 +49,7 @@ final class Ctype
      *
      * @return bool
      */
+    #[SuppressWarnings("php:S100")]
     public static function ctype_alpha($text)
     {
         $text = self::convert_int_to_char_for_ctype($text, __FUNCTION__);
@@ -65,6 +66,7 @@ final class Ctype
      *
      * @return bool
      */
+    #[SuppressWarnings("php:S100")]
     public static function ctype_cntrl($text)
     {
         $text = self::convert_int_to_char_for_ctype($text, __FUNCTION__);
@@ -81,6 +83,7 @@ final class Ctype
      *
      * @return bool
      */
+    #[SuppressWarnings("php:S100")]
     public static function ctype_digit($text)
     {
         $text = self::convert_int_to_char_for_ctype($text, __FUNCTION__);
@@ -97,6 +100,7 @@ final class Ctype
      *
      * @return bool
      */
+    #[SuppressWarnings("php:S100")]
     public static function ctype_graph($text)
     {
         $text = self::convert_int_to_char_for_ctype($text, __FUNCTION__);
@@ -113,6 +117,7 @@ final class Ctype
      *
      * @return bool
      */
+    #[SuppressWarnings("php:S100")]
     public static function ctype_lower($text)
     {
         $text = self::convert_int_to_char_for_ctype($text, __FUNCTION__);
@@ -129,6 +134,7 @@ final class Ctype
      *
      * @return bool
      */
+    #[SuppressWarnings("php:S100")]
     public static function ctype_print($text)
     {
         $text = self::convert_int_to_char_for_ctype($text, __FUNCTION__);
@@ -145,6 +151,7 @@ final class Ctype
      *
      * @return bool
      */
+    #[SuppressWarnings("php:S100")]
     public static function ctype_punct($text)
     {
         $text = self::convert_int_to_char_for_ctype($text, __FUNCTION__);
@@ -161,6 +168,7 @@ final class Ctype
      *
      * @return bool
      */
+    #[SuppressWarnings("php:S100")]
     public static function ctype_space($text)
     {
         $text = self::convert_int_to_char_for_ctype($text, __FUNCTION__);
@@ -177,6 +185,7 @@ final class Ctype
      *
      * @return bool
      */
+    #[SuppressWarnings("php:S100")]
     public static function ctype_upper($text)
     {
         $text = self::convert_int_to_char_for_ctype($text, __FUNCTION__);
@@ -193,6 +202,7 @@ final class Ctype
      *
      * @return bool
      */
+    #[SuppressWarnings("php:S100")]
     public static function ctype_xdigit($text)
     {
         $text = self::convert_int_to_char_for_ctype($text, __FUNCTION__);
@@ -213,6 +223,7 @@ final class Ctype
      *
      * @return mixed
      */
+    #[SuppressWarnings("php:S100")]
     private static function convert_int_to_char_for_ctype($int, $function)
     {
         if (!\is_int($int)) {
