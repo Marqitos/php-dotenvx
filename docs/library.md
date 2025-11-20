@@ -7,7 +7,7 @@
 - Rodas\Dotenvx\Provider\StaticKeyProvider _(class)_
 
 ```text
-src/Dotenvx/             (Rodas\Dotenvx\ namespace)
+library/Rodas/Dotenvx/             (Rodas\Dotenvx\ namespace)
 ├── Decryptor.php
 ├── Adapter/
 │   ├── ArrayAdapter.php

@@ -28,7 +28,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Rodas\\Dotenvx\\": "src/Rodas/Dotenvx/",
+            "Rodas\\Dotenvx\\": "library/Rodas/Dotenvx/",
             "Rodas\\Test\\Dotenvx\\": "tests/Dotenvx/"
         }
     },
@@ -40,7 +40,7 @@
         "dev:lint": [
             "@dev:lint:syntax"
         ],
-        "dev:lint:syntax": "parallel-lint --colors src/",
+        "dev:lint:syntax": "parallel-lint --colors library/",
         "dev:test": [
             "@dev:lint",
             "@dev:test:unit"
