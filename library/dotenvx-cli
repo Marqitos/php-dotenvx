@@ -1,0 +1,32 @@
+#!/usr/bin/env php
+<?php
+
+// Create key files
+use Rodas\Dotenvx\Decryptor;
+
+require_once __DIR__ . '/bootstrap.php';
+require_once 'Rodas/Dotenvx/Decryptor.php';
+
+$privateKeyFile = __DIR__ . '/.env.key';
+$publicKeyFile  = __DIR__ . '/.env';
+
+list($privateKey, $publicKey) = Decryptor::createKeyPair();
+
+if (!file_exists($privateKeyFile)) {
+    $fileContent    = "# Private key in base64 (32 bytes)\n"
+                    . "DOTENV_PRIVATE_KEY=$privateKey\n";
+
+    file_put_contents($privateKeyFile, $fileContent);
+    echo "Private key file created: $privateKeyFile\n";
+}
+
+if (!file_exists($publicKeyFile)) {
+    $fileContent    = "# Public key in base64 (32 bytes)\n"
+                    . "DOTENV_PUBLIC_KEY=$privateKey\n";
+
+    file_put_contents($publicKeyFile, $fileContent);
+    echo "Public key file created: $publicKeyFile\n";
+}
+
+echo "Private key: $privateKey\n";
+echo "Public key: $publicKey\n";
