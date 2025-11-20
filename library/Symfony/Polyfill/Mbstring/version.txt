@@ -1,0 +1,3 @@
+Name: symfony/polyfill-mbstring
+Commit: 6d857f4d76bd4b343eac26d6b539585d2bc56493
+Version: v1.33.0

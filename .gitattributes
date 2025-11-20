@@ -28,6 +28,7 @@
 /.github/               export-ignore
 /build/                 export-ignore
 /docs/                  export-ignore
+/library/               export-ignore
 /tests/                 export-ignore
 /phpunit.xml            export-ignore
 /phpcs.xml              export-ignore
