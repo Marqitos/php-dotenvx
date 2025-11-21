@@ -11,7 +11,7 @@ use Dotenv\Util\Str;
 use PhpOption\Option;
 
 require_once __DIR__ . '/../Parser/Value.php';
-require_once __DIR__ . '/Repository/RepositoryInterface.php';
+require_once __DIR__ . '/../Repository/RepositoryInterface.php';
 
 final class Resolver
 {
