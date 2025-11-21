@@ -22,3 +22,6 @@ composer.phar
 
 # Environment secrets
 **.env*
+
+# Excepts test files
+!tests/fixtures/env/**.env*

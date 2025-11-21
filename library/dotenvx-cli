@@ -13,20 +13,30 @@ $publicKeyFile  = __DIR__ . '/.env';
 list($privateKey, $publicKey) = Decryptor::createKeyPair();
 
 if (!file_exists($privateKeyFile)) {
-    $fileContent    = "# Private key in base64 (32 bytes)\n"
+    $fileContent    = "#/------------------!DOTENV_PRIVATE_KEYS!-------------------/\n"
+                    . "#/ private decryption keys. DO NOT commit to source control /\n"
+                    . "#/     [how it works](https://dotenvx.com/encryption)       /\n"
+                    . "#/----------------------------------------------------------/\n"
+                    . "\n"
                     . "DOTENV_PRIVATE_KEY=$privateKey\n";
 
     file_put_contents($privateKeyFile, $fileContent);
-    echo "Private key file created: $privateKeyFile\n";
+    echo "✔ Private key file created: $privateKeyFile\n";
+} else {
+    echo "Private key: $privateKey\n";
 }
 
 if (!file_exists($publicKeyFile)) {
-    $fileContent    = "# Public key in base64 (32 bytes)\n"
-                    . "DOTENV_PUBLIC_KEY=$privateKey\n";
+    $fileContent    = "#/-------------------[DOTENV_PUBLIC_KEY]--------------------/\n"
+                    . "#/            public-key encryption for .env files          /\n"
+                    . "#/       [how it works](https://dotenvx.com/encryption)     /\n"
+                    . "#/----------------------------------------------------------/\n"
+                    . "DOTENV_PUBLIC_KEY=$publicKey\n"
+                    . "\n"
+                    . "# .env\n";
 
     file_put_contents($publicKeyFile, $fileContent);
-    echo "Public key file created: $publicKeyFile\n";
+    echo "✔ Public key file created: $publicKeyFile\n";
+} else {
+    echo "Public key: $publicKey\n";
 }
-
-echo "Private key: $privateKey\n";
-echo "Public key: $publicKey\n";
