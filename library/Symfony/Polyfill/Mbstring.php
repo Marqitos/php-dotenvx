@@ -76,6 +76,7 @@ namespace Symfony\Polyfill;
 final class Mbstring
 {
     const R_ICONV_BOOTSTRAP     = 'Symfony/Polyfill/Iconv/bootstrap.php';
+
     public const MB_CASE_FOLD = \PHP_INT_MAX;
 
     private const SIMPLE_CASE_FOLD = [
@@ -87,6 +88,7 @@ final class Mbstring
     private static $language = 'neutral';
     private static $internalEncoding = 'UTF-8';
 
+    #[SuppressWarnings("php:S100")]
     public static function mb_convert_encoding($s, $toEncoding, $fromEncoding = null)
     {
         if (\is_array($s)) {
@@ -136,6 +138,7 @@ final class Mbstring
         return iconv($fromEncoding, $toEncoding.'//IGNORE', $s);
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function mb_convert_variables($toEncoding, $fromEncoding, &...$vars)
     {
         $ok = true;
@@ -148,17 +151,20 @@ final class Mbstring
         return $ok ? $fromEncoding : false;
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function mb_decode_mimeheader($s)
     {
         require_once R_ICONV_BOOTSTRAP;
         return iconv_mime_decode($s, 2, self::$internalEncoding);
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function mb_encode_mimeheader($s, $charset = null, $transferEncoding = null, $linefeed = null, $indent = null)
     {
         trigger_error('mb_encode_mimeheader() is bugged. Please use iconv_mime_encode() instead', \E_USER_WARNING);
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function mb_decode_numericentity($s, $convmap, $encoding = null)
     {
         if (null !== $s && !\is_scalar($s) && !(\is_object($s) && method_exists($s, '__toString'))) {
@@ -220,6 +226,7 @@ final class Mbstring
         return iconv('UTF-8', $encoding.'//IGNORE', $s);
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function mb_encode_numericentity($s, $convmap, $encoding = null, $is_hex = false)
     {
         if (null !== $s && !\is_scalar($s) && !(\is_object($s) && method_exists($s, '__toString'))) {
@@ -291,6 +298,7 @@ final class Mbstring
         return iconv('UTF-8', $encoding.'//IGNORE', $result);
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function mb_convert_case($s, $mode, $encoding = null)
     {
         $s = (string) $s;
@@ -374,6 +382,7 @@ final class Mbstring
         return iconv('UTF-8', $encoding.'//IGNORE', $s);
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function mb_internal_encoding($encoding = null)
     {
         if (null === $encoding) {
@@ -396,6 +405,7 @@ final class Mbstring
         throw new \ValueError(sprintf('Argument #1 ($encoding) must be a valid encoding, "%s" given', $encoding));
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function mb_language($lang = null)
     {
         if (null === $lang) {
@@ -417,11 +427,13 @@ final class Mbstring
         throw new \ValueError(sprintf('Argument #1 ($language) must be a valid language, "%s" given', $lang));
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function mb_list_encodings()
     {
         return ['UTF-8'];
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function mb_encoding_aliases($encoding)
     {
         switch (strtoupper($encoding)) {
@@ -433,6 +445,7 @@ final class Mbstring
         return false;
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function mb_check_encoding($var = null, $encoding = null)
     {
         if (null === $encoding) {
@@ -459,6 +472,7 @@ final class Mbstring
         return true;
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function mb_detect_encoding($str, $encodingList = null, $strict = false)
     {
         if (null === $encodingList) {
@@ -495,6 +509,7 @@ final class Mbstring
         return false;
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function mb_detect_order($encodingList = null)
     {
         if (null === $encodingList) {
@@ -524,6 +539,7 @@ final class Mbstring
         return true;
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function mb_strlen($s, $encoding = null)
     {
         $encoding = self::getEncoding($encoding);
@@ -535,6 +551,7 @@ final class Mbstring
         return @iconv_strlen($s, $encoding);
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function mb_strpos($haystack, $needle, $offset = 0, $encoding = null)
     {
         $encoding = self::getEncoding($encoding);
@@ -557,6 +574,7 @@ final class Mbstring
         return iconv_strpos($haystack, $needle, $offset, $encoding);
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function mb_strrpos($haystack, $needle, $offset = 0, $encoding = null)
     {
         $encoding = self::getEncoding($encoding);
@@ -585,6 +603,7 @@ final class Mbstring
         return false !== $pos ? $offset + $pos : false;
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function mb_str_split($string, $split_length = 1, $encoding = null)
     {
         if (null !== $string && !\is_scalar($string) && !(\is_object($string) && method_exists($string, '__toString'))) {
@@ -628,16 +647,19 @@ final class Mbstring
         return $result;
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function mb_strtolower($s, $encoding = null)
     {
         return self::mb_convert_case($s, \MB_CASE_LOWER, $encoding);
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function mb_strtoupper($s, $encoding = null)
     {
         return self::mb_convert_case($s, \MB_CASE_UPPER, $encoding);
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function mb_substitute_character($c = null)
     {
         if (null === $c) {
@@ -656,6 +678,7 @@ final class Mbstring
         throw new \ValueError('Argument #1 ($substitute_character) must be "none", "long", "entity" or a valid codepoint');
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function mb_substr($s, $start, $length = null, $encoding = null)
     {
         $encoding = self::getEncoding($encoding);
@@ -683,6 +706,7 @@ final class Mbstring
         return (string) iconv_substr($s, $start, $length, $encoding);
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function mb_stripos($haystack, $needle, $offset = 0, $encoding = null)
     {
         [$haystack, $needle] = str_replace(self::SIMPLE_CASE_FOLD[0], self::SIMPLE_CASE_FOLD[1], [
@@ -693,6 +717,7 @@ final class Mbstring
         return self::mb_strpos($haystack, $needle, $offset, $encoding);
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function mb_stristr($haystack, $needle, $part = false, $encoding = null)
     {
         $pos = self::mb_stripos($haystack, $needle, 0, $encoding);
@@ -700,6 +725,7 @@ final class Mbstring
         return self::getSubpart($pos, $part, $haystack, $encoding);
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function mb_strrchr($haystack, $needle, $part = false, $encoding = null)
     {
         $encoding = self::getEncoding($encoding);
@@ -714,6 +740,7 @@ final class Mbstring
         return self::getSubpart($pos, $part, $haystack, $encoding);
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function mb_strrichr($haystack, $needle, $part = false, $encoding = null)
     {
         $needle = self::mb_substr($needle, 0, 1, $encoding);
@@ -722,6 +749,7 @@ final class Mbstring
         return self::getSubpart($pos, $part, $haystack, $encoding);
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function mb_strripos($haystack, $needle, $offset = 0, $encoding = null)
     {
         $haystack = self::mb_convert_case($haystack, \MB_CASE_LOWER, $encoding);
@@ -733,6 +761,7 @@ final class Mbstring
         return self::mb_strrpos($haystack, $needle, $offset, $encoding);
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function mb_strstr($haystack, $needle, $part = false, $encoding = null)
     {
         $pos = strpos($haystack, $needle);
@@ -746,6 +775,7 @@ final class Mbstring
         return substr($haystack, $pos);
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function mb_get_info($type = 'all')
     {
         $info = [
@@ -775,16 +805,19 @@ final class Mbstring
         return false;
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function mb_http_input($type = '')
     {
         return false;
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function mb_http_output($encoding = null)
     {
         return null !== $encoding ? 'pass' === $encoding : 'pass';
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function mb_strwidth($s, $encoding = null)
     {
         $encoding = self::getEncoding($encoding);
@@ -799,16 +832,19 @@ final class Mbstring
         return ($wide << 1) + iconv_strlen($s, 'UTF-8');
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function mb_substr_count($haystack, $needle, $encoding = null)
     {
         return substr_count($haystack, $needle);
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function mb_output_handler($contents, $status)
     {
         return $contents;
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function mb_chr($code, $encoding = null)
     {
         if (0x80 > $code %= 0x200000) {
@@ -828,6 +864,7 @@ final class Mbstring
         return $s;
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function mb_ord($s, $encoding = null)
     {
         if ('UTF-8' !== $encoding = self::getEncoding($encoding)) {
@@ -852,6 +889,7 @@ final class Mbstring
         return $code;
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function mb_str_pad(string $string, int $length, string $pad_string = ' ', int $pad_type = \STR_PAD_RIGHT, ?string $encoding = null): string
     {
         if (!\in_array($pad_type, [\STR_PAD_RIGHT, \STR_PAD_LEFT, \STR_PAD_BOTH], true)) {
@@ -887,6 +925,7 @@ final class Mbstring
         }
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function mb_ucfirst(string $string, ?string $encoding = null): string
     {
         if (null === $encoding) {
@@ -901,6 +940,7 @@ final class Mbstring
         return $firstChar.mb_substr($string, 1, null, $encoding);
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function mb_lcfirst(string $string, ?string $encoding = null): string
     {
         if (null === $encoding) {
@@ -989,16 +1029,19 @@ final class Mbstring
         return $encoding;
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function mb_trim(string $string, ?string $characters = null, ?string $encoding = null): string
     {
         return self::mb_internal_trim('{^[%s]+|[%1$s]+$}Du', $string, $characters, $encoding, __FUNCTION__);
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function mb_ltrim(string $string, ?string $characters = null, ?string $encoding = null): string
     {
         return self::mb_internal_trim('{^[%s]+}Du', $string, $characters, $encoding, __FUNCTION__);
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function mb_rtrim(string $string, ?string $characters = null, ?string $encoding = null): string
     {
         return self::mb_internal_trim('{[%s]+$}Du', $string, $characters, $encoding, __FUNCTION__);

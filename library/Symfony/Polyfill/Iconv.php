@@ -122,8 +122,6 @@ final class Iconv
     ];
     private static $translitMap = [];
     private static $convertMap = [];
-    private static $errorHandler;
-    private static $lastError;
 
     private static $ulenMask = ["\xC0" => 2, "\xD0" => 2, "\xE0" => 3, "\xF0" => 4];
     private static $isValidUtf8;
@@ -230,6 +228,7 @@ final class Iconv
         return $str;
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function iconv_mime_decode_headers($str, $mode = 0, $charset = null)
     {
         if (null === $charset) {
@@ -266,6 +265,7 @@ final class Iconv
         return $headers;
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function iconv_mime_decode($str, $mode = 0, $charset = null)
     {
         if (null === $charset) {
@@ -328,21 +328,22 @@ final class Iconv
         return $result;
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function iconv_get_encoding($type = 'all')
     {
-        switch ($type) {
-            case 'input_encoding': return self::$inputEncoding;
-            case 'output_encoding': return self::$outputEncoding;
-            case 'internal_encoding': return self::$internalEncoding;
-        }
-
-        return [
+        return match($type) {
             'input_encoding' => self::$inputEncoding,
             'output_encoding' => self::$outputEncoding,
-            'internal_encoding' => self::$internalEncoding,
-        ];
+            'internal_encoding' =>self::$internalEncoding,
+            _ =>[
+                'input_encoding' => self::$inputEncoding,
+                'output_encoding' => self::$outputEncoding,
+                'internal_encoding' => self::$internalEncoding,
+            ]
+        };
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function iconv_set_encoding($type, $charset)
     {
         switch ($type) {
@@ -355,6 +356,7 @@ final class Iconv
         return true;
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function iconv_mime_encode($fieldName, $fieldValue, $pref = null)
     {
         if (!\is_array($pref)) {
@@ -431,6 +433,7 @@ final class Iconv
         return $fieldName.': '.implode($pref['line-break-chars'].' ', $fieldValue);
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function iconv_strlen($s, $encoding = null)
     {
         if (null === $encoding) {
@@ -455,6 +458,7 @@ final class Iconv
         return $j;
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function iconv_strpos($haystack, $needle, $offset = 0, $encoding = null)
     {
         if (null === $encoding) {
@@ -478,6 +482,7 @@ final class Iconv
         return false === $pos ? false : ($offset + ($pos ? self::iconv_strlen(substr($haystack, 0, $pos), 'utf-8') : 0));
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function iconv_strrpos($haystack, $needle, $encoding = null)
     {
         if (null === $encoding) {
@@ -498,6 +503,7 @@ final class Iconv
         return false === $pos ? false : self::iconv_strlen($pos ? substr($haystack, 0, $pos) : $haystack, 'utf-8');
     }
 
+    #[SuppressWarnings("php:S100")]
     public static function iconv_substr($s, $start, $length = 2147483647, $encoding = null)
     {
         if (null === $encoding) {

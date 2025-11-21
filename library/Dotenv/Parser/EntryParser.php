@@ -20,6 +20,7 @@ final class EntryParser
     const R_GRAHAM_CAMPBELL_RESULT_TYPE_ERROR   = 'GrahamCampbell/ResultType/Error.php';
     const R_GRAHAM_CAMPBELL_RESULT_TYPE_RESULT  = 'GrahamCampbell/ResultType/Result.php';
     const R_GRAHAM_CAMPBELL_RESULT_TYPE_SUCCESS = 'GrahamCampbell/ResultType/Success.php';
+    const R_SYMFONY_POLYFILL_CTYPE_BOOTSTRAP    = 'Symfony/Polyfill/Ctype/bootstrap.php';
 
     private const INITIAL_STATE = 0;
     private const UNQUOTED_STATE = 1;
@@ -111,7 +112,7 @@ final class EntryParser
     {
         require_once self::R_DOTENV_UTIL_STR;
         if (!is_callable('ctype_space')) {
-            require_once 'Symfony/Polyfill/Ctype/bootstrap.php';
+            require_once self::R_SYMFONY_POLYFILL_CTYPE_BOOTSTRAP;
         }
         if (Str::len($name) > 8 && Str::substr($name, 0, 6) === 'export' && ctype_space(Str::substr($name, 6, 1))) {
             $name = \ltrim(Str::substr($name, 6));
@@ -243,7 +244,7 @@ final class EntryParser
             case self::UNQUOTED_STATE:
                 require_once self::R_GRAHAM_CAMPBELL_RESULT_TYPE_SUCCESS;
                 if (!is_callable('ctype_space')) {
-                    require_once 'Symfony/Polyfill/Ctype/bootstrap.php';
+                    require_once R_Symfony_Polyfill_Ctype_bootstrap;
                 }
                 if ($token === '#') {
                     /** @var \GrahamCampbell\ResultType\Result<array{string, bool, int}, string> */
@@ -283,11 +284,7 @@ final class EntryParser
                     return Success::create([$token, false, self::DOUBLE_QUOTED_STATE]);
                 }
             case self::ESCAPE_SEQUENCE_STATE:
-                if ($token === '"' || $token === '\\') {
-                    require_once self::R_GRAHAM_CAMPBELL_RESULT_TYPE_SUCCESS;
-                    /** @var \GrahamCampbell\ResultType\Result<array{string, bool, int}, string> */
-                    return Success::create([$token, false, self::DOUBLE_QUOTED_STATE]);
-                } elseif ($token === '$') {
+                if ($token === '"' || $token === '\\' || $token === '$') {
                     require_once self::R_GRAHAM_CAMPBELL_RESULT_TYPE_SUCCESS;
                     /** @var \GrahamCampbell\ResultType\Result<array{string, bool, int}, string> */
                     return Success::create([$token, false, self::DOUBLE_QUOTED_STATE]);
@@ -306,7 +303,7 @@ final class EntryParser
                 }
             case self::WHITESPACE_STATE:
                 if (!is_callable('ctype_space')) {
-                    require_once 'Symfony/Polyfill/Ctype/bootstrap.php';
+                    require_once R_Symfony_Polyfill_Ctype_bootstrap;
                 }
                 if ($token === '#') {
                     require_once self::R_GRAHAM_CAMPBELL_RESULT_TYPE_SUCCESS;

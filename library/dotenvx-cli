@@ -1,0 +1,42 @@
+#!/usr/bin/env php
+<?php
+
+// Create key files
+use Rodas\Dotenvx\Decryptor;
+
+require_once __DIR__ . '/bootstrap.php';
+require_once 'Rodas/Dotenvx/Decryptor.php';
+
+$privateKeyFile = __DIR__ . '/.env.key';
+$publicKeyFile  = __DIR__ . '/.env';
+
+list($privateKey, $publicKey) = Decryptor::createKeyPair();
+
+if (!file_exists($privateKeyFile)) {
+    $fileContent    = "#/------------------!DOTENV_PRIVATE_KEYS!-------------------/\n"
+                    . "#/ private decryption keys. DO NOT commit to source control /\n"
+                    . "#/     [how it works](https://dotenvx.com/encryption)       /\n"
+                    . "#/----------------------------------------------------------/\n"
+                    . "\n"
+                    . "DOTENV_PRIVATE_KEY=$privateKey\n";
+
+    file_put_contents($privateKeyFile, $fileContent);
+    echo "✔ Private key file created: $privateKeyFile\n";
+} else {
+    echo "Private key: $privateKey\n";
+}
+
+if (!file_exists($publicKeyFile)) {
+    $fileContent    = "#/-------------------[DOTENV_PUBLIC_KEY]--------------------/\n"
+                    . "#/            public-key encryption for .env files          /\n"
+                    . "#/       [how it works](https://dotenvx.com/encryption)     /\n"
+                    . "#/----------------------------------------------------------/\n"
+                    . "DOTENV_PUBLIC_KEY=$publicKey\n"
+                    . "\n"
+                    . "# .env\n";
+
+    file_put_contents($publicKeyFile, $fileContent);
+    echo "✔ Public key file created: $publicKeyFile\n";
+} else {
+    echo "Public key: $publicKey\n";
+}
