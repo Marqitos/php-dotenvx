@@ -20,7 +20,8 @@ jobs:
       fail-fast: false
       matrix:
         php-version:
-          - "8.4" # Minimum supported PHP version, for future versions
+          - "8.4" # Minimum supported PHP version
+          - "8.5"
         operating-system:
           - "ubuntu-latest"
           - "windows-latest"
@@ -42,13 +43,12 @@ jobs:
         if: ${{ matrix.operating-system == 'ubuntu-latest' }}
         run: |
           sudo apt-get update
-          sudo apt-get -y install libsodium-dev uuid-dev
+          sudo apt-get -y install libsodium-dev
 
       - name: "Install PHP"
         uses: "shivammathur/setup-php@v2"
         with:
-          php-version: "8.4"
-#          php-version: "${{ matrix.php-version }}"
+          php-version: "${{ matrix.php-version }}"
           extensions: "sodium"
           coverage: "none"
           ini-values: "memory_limit=-1"
