@@ -17,6 +17,7 @@ namespace Rodas\Dotenvx;
 
 use Exception;
 use Rodas\Dotenvx\Adapter\ArrayAdapter;
+use Rodas\Dotenvx\Adapter\ArrayMultiAdapter;
 use Rodas\Dotenvx\Provider\KeyProviderInterface;
 use RuntimeException;
 
@@ -113,6 +114,35 @@ class Decryptor {
 
                 $decryptedValue = self::decrypt($value, $keyProvider);
                 $adapter->write($key, $decryptedValue);
+            }
+        }
+    }
+
+    /**
+     * Decrypt all encrypted values in an ArrayMultiAdapter instance.
+     *
+     * @param  ArrayMultiAdapter    $adapter     The ArrayMultiAdapter instance containing the values to decrypt.
+     * @param  KeyProviderInterface $keyProvider Keys used for decryption.
+     * @param  array<string>        $xPath       The path to the values to decrypt within the ArrayMultiAdapter instance.
+     * @return void
+     */
+    public static function decryptArrayMultiAdapter(#[SensitiveParameter]ArrayMultiAdapter $adapter, #[SensitiveParameter] KeyProviderInterface $keyProvider, array $xPath = []): void {
+        $values     = $adapter->values;
+        foreach ($xPath as $part) {
+            $values = $values[$part];
+        }
+        foreach ($values as $key => $value) {
+            if ($key == 'DOTENV_PUBLIC_KEY') {
+                continue;
+            }
+            if (is_string($value) &&
+                substr($value, 0, 10) == 'encrypted:') {
+
+                $decryptedValue = self::decrypt($value, $keyProvider);
+                $key = $adapter->getKey(array_merge($xPath, [$key]));
+                $adapter->write($key, $decryptedValue);
+            } elseif (is_array($value)) {
+                self::decryptArrayMultiAdapter($adapter, $keyProvider, array_merge($xPath, [$key]));
             }
         }
     }

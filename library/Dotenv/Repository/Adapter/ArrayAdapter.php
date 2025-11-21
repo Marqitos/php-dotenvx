@@ -7,6 +7,8 @@ namespace Dotenv\Repository\Adapter;
 use PhpOption\Option;
 use PhpOption\Some;
 
+require_once __DIR__ . '/AdapterInterface.php';
+
 final class ArrayAdapter implements AdapterInterface
 {
     /**
