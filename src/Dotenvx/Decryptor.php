@@ -16,6 +16,9 @@ declare(strict_types=1);
 namespace Rodas\Dotenvx;
 
 use Exception;
+use Rodas\Dotenvx\Adapter\ArrayAdapter;
+use Rodas\Dotenvx\Adapter\ArrayMultiAdapter;
+use Rodas\Dotenvx\Provider\KeyProviderInterface;
 use RuntimeException;
 
 use function function_exists;
@@ -42,7 +45,6 @@ class Decryptor {
      * Return a private key and a public key pair of X25519 in base64
      *
      * @return array<string>    [privateKey, publicKey] Keys base64 encoded.
-     * @throws RuntimeException If the Sodium extension is not available, and the polyfill can't be loaded.
      */
     public static function createKeyPair() {
         $keyPair = sodium_crypto_box_keypair();
@@ -54,12 +56,20 @@ class Decryptor {
         ];
     }
 
-    public static function decrypt(string $encryptedValue, #[SensitiveParameter] string $privateKey, string $publicKey): string {
+    /**
+     * Decrypts a value using the provided private key and public key.
+     *
+     * @param  string               $encryptedValue The encrypted value to decrypt.
+     * @param  KeyProviderInterface $keyProvider    Keys used for decryption.
+     * @return string                               The decrypted value.
+     * @throws Exception                            If the decryption fails.
+     */
+    public static function decrypt(string $encryptedValue, #[SensitiveParameter] KeyProviderInterface $keyProvider): string {
         if (substr($encryptedValue, 0, 10) == 'encrypted:') {
             $cipherText     = base64_decode(substr($encryptedValue, 10));
-            $privateKeyBin  = sodium_base642bin($privateKey,    SODIUM_BASE64_VARIANT_ORIGINAL);
-            $publicKeyBin   = sodium_base642bin($publicKey,     SODIUM_BASE64_VARIANT_ORIGINAL);
-            $keyPair        = sodium_crypto_box_keypair_from_secretkey_and_publickey($privateKeyBin, $publicKeyBin);
+            $privateKey     = sodium_base642bin($keyProvider->privateKey,   SODIUM_BASE64_VARIANT_ORIGINAL);
+            $publicKey      = sodium_base642bin($keyProvider->publicKey,    SODIUM_BASE64_VARIANT_ORIGINAL);
+            $keyPair        = sodium_crypto_box_keypair_from_secretkey_and_publickey($privateKey, $publicKey);
             $plaintext      = sodium_crypto_box_seal_open($cipherText, $keyPair);
             if ($plaintext === false) {
                 throw new Exception("Desencriptado fallido");
@@ -69,6 +79,34 @@ class Decryptor {
         return $encryptedValue;
     }
 
+    /**
+     * Decrypt all encrypted values in an ArrayAdapter instance.
+     *
+     * @param  ArrayAdapter         $adapter     The ArrayAdapter instance containing the values to decrypt.
+     * @param  KeyProviderInterface $keyProvider Keys used for decryption.
+     * @return void
+     */
+    public static function decryptArrayAdapter(#[SensitiveParameter]ArrayAdapter $adapter, #[SensitiveParameter] KeyProviderInterface $keyProvider): void {
+        foreach ($adapter->values as $key => $value) {
+            if ($key == 'DOTENV_PUBLIC_KEY') {
+                continue;
+            }
+            if (is_string($value) &&
+                substr($value, 0, 10) == 'encrypted:') {
+
+                $decryptedValue = self::decrypt($value, $keyProvider);
+                $adapter->write($key, $decryptedValue);
+            }
+        }
+    }
+
+    /**
+     * Encrypts a value using the provided public key.
+     *
+     * @param  string $value     The value to encrypt.
+     * @param  string $publicKey The public key used for encryption.
+     * @return string            The encrypted value.
+     */
     public static function encrypt(#[SensitiveParameter] string $value, string $publicKey): string {
         $publicKeyBin   = sodium_base642bin($publicKey, SODIUM_BASE64_VARIANT_ORIGINAL);
         $cipherText     = sodium_crypto_box_seal($value, $publicKeyBin);
@@ -80,7 +118,6 @@ class Decryptor {
      *
      * @param  string $string   Decoded/raw binary string.
      * @return string           Base64 string.
-     * @throws RuntimeException If the Sodium extension is not available, and the polyfill can't be loaded.
      */
     public static function cryptoBase64Encode(string $string) {
         return sodium_bin2base64($string, SODIUM_BASE64_VARIANT_ORIGINAL);
@@ -91,7 +128,6 @@ class Decryptor {
      *
      * @param  string $string   Base64 string.
      * @return string           Decoded/raw binary string.
-     * @throws RuntimeException If the Sodium extension is not available, and the polyfill can't be loaded.
      */
     public static function cryptoBase64Decode(string $string) {
         return sodium_base642bin($string, SODIUM_BASE64_VARIANT_ORIGINAL);
