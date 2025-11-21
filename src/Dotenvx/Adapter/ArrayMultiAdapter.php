@@ -133,7 +133,13 @@ class ArrayMultiAdapter implements AdapterInterface {
         foreach ($parts as $key) {
             $depth++;
             if ($depth === $count) {
-                $array[$key] = $value;
+                if (isset($array[$key]) &&
+                    is_array($array[$key])) {
+
+                    $array[$key][] = $value;
+                } else {
+                    $array[$key] = $value;
+                }
             } elseif (!isset($array[$key])) {
                 $array[$key] = [];
             }
@@ -171,4 +177,14 @@ class ArrayMultiAdapter implements AdapterInterface {
         return true;
     }
 # -- Methods
+
+    /**
+     * Return a key name from a multilevel xpath
+     *
+     * @param  array $names
+     * @return string
+     */
+    public function getKey(array $names): string {
+        return implode($this->separator, $names);
+    }
 }
