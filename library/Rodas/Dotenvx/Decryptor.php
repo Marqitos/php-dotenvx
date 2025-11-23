@@ -16,10 +16,9 @@ declare(strict_types=1);
 namespace Rodas\Dotenvx;
 
 use Exception;
-use Rodas\Dotenvx\Adapter\ArrayAdapter;
-use Rodas\Dotenvx\Adapter\ArrayMultiAdapter;
 use Rodas\Dotenvx\Provider\KeyProviderInterface;
 use RuntimeException;
+use SensitiveParameter;
 
 use function function_exists;
 use function sodium_base642bin;
@@ -47,8 +46,7 @@ if (!is_callable('sodium_base642bin') ||
     require_once 'ParagonIE/Sodium/php72compat.php';
 }
 
-require_once 'Rodas/Dotenvx/Adapter/ArrayAdapter.php';
-require_once 'Rodas/Dotenvx/Provider/KeyProviderInterface.php';
+require_once __DIR__ . '/Provider/KeyProviderInterface.php';
 
 /**
  * Provide Montgomery curve, Curve25519, encryption functions. (Usually abbreviated as X25519)
@@ -61,10 +59,9 @@ class Decryptor {
     /**
      * Return a private key and a public key pair of X25519 in base64
      *
-     * @return array<string>    [privateKey, publicKey] Keys base64 encoded.
-     * @throws RuntimeException If the Sodium extension is not available, and the polyfill can't be loaded.
+     * @return array<string> [privateKey, publicKey] Keys base64 encoded.
      */
-    public static function createKeyPair() {
+    public static function createKeyPair(): array {
         $keyPair = sodium_crypto_box_keypair();
         $privateKey = sodium_crypto_box_secretkey($keyPair);
         $publicKey  = sodium_crypto_box_publickey($keyPair);
@@ -75,7 +72,27 @@ class Decryptor {
     }
 
     /**
-     * Decrypts a value using the provided private key and public key.
+     * Converts a raw binary string into a base64-encoded string (constant-time mode).
+     *
+     * @param  string $string Decoded/raw binary string.
+     * @return string         Base64 string.
+     */
+    public static function cryptoBase64Encode(string $string): string {
+        return sodium_bin2base64($string, SODIUM_BASE64_VARIANT_ORIGINAL);
+    }
+
+    /**
+     * Converts a base64 encoded string into raw binary (constant-time mode).
+     *
+     * @param  string $string Base64 string.
+     * @return string         Decoded/raw binary string.
+     */
+    public static function cryptoBase64Decode(string $string): string {
+        return sodium_base642bin($string, SODIUM_BASE64_VARIANT_ORIGINAL);
+    }
+    
+    /**
+     * Decrypts a value using the provided keys.
      *
      * @param  string               $encryptedValue The encrypted value to decrypt.
      * @param  KeyProviderInterface $keyProvider    Keys used for decryption.
@@ -97,56 +114,6 @@ class Decryptor {
         return $encryptedValue;
     }
 
-        /**
-     * Decrypt all encrypted values in an ArrayAdapter instance.
-     *
-     * @param  ArrayAdapter         $adapter     The ArrayAdapter instance containing the values to decrypt.
-     * @param  KeyProviderInterface $keyProvider Keys used for decryption.
-     * @return void
-     */
-    public static function decryptArrayAdapter(#[SensitiveParameter]ArrayAdapter $adapter, #[SensitiveParameter] KeyProviderInterface $keyProvider): void {
-        foreach ($adapter->values as $key => $value) {
-            if ($key == 'DOTENV_PUBLIC_KEY') {
-                continue;
-            }
-            if (is_string($value) &&
-                substr($value, 0, 10) == 'encrypted:') {
-
-                $decryptedValue = self::decrypt($value, $keyProvider);
-                $adapter->write($key, $decryptedValue);
-            }
-        }
-    }
-
-    /**
-     * Decrypt all encrypted values in an ArrayMultiAdapter instance.
-     *
-     * @param  ArrayMultiAdapter    $adapter     The ArrayMultiAdapter instance containing the values to decrypt.
-     * @param  KeyProviderInterface $keyProvider Keys used for decryption.
-     * @param  array<string>        $xPath       The path to the values to decrypt within the ArrayMultiAdapter instance.
-     * @return void
-     */
-    public static function decryptArrayMultiAdapter(#[SensitiveParameter]ArrayMultiAdapter $adapter, #[SensitiveParameter] KeyProviderInterface $keyProvider, array $xPath = []): void {
-        $values     = $adapter->values;
-        foreach ($xPath as $part) {
-            $values = $values[$part];
-        }
-        foreach ($values as $key => $value) {
-            if ($key == 'DOTENV_PUBLIC_KEY') {
-                continue;
-            }
-            if (is_string($value) &&
-                substr($value, 0, 10) == 'encrypted:') {
-
-                $decryptedValue = self::decrypt($value, $keyProvider);
-                $key = $adapter->getKey(array_merge($xPath, [$key]));
-                $adapter->write($key, $decryptedValue);
-            } elseif (is_array($value)) {
-                self::decryptArrayMultiAdapter($adapter, $keyProvider, array_merge($xPath, [$key]));
-            }
-        }
-    }
-
     /**
      * Encrypts a value using the provided public key.
      *
@@ -159,27 +126,4 @@ class Decryptor {
         $cipherText     = sodium_crypto_box_seal($value, $publicKeyBin);
         return 'encrypted:' . base64_encode($cipherText);
     }
-
-    /**
-     * Converts a raw binary string into a base64-encoded string (constant-time mode).
-     *
-     * @param  string $string   Decoded/raw binary string.
-     * @return string           Base64 string.
-     * @throws RuntimeException If the Sodium extension is not available, and the polyfill can't be loaded.
-     */
-    public static function cryptoBase64Encode(string $string) {
-        return sodium_bin2base64($string, SODIUM_BASE64_VARIANT_ORIGINAL);
-    }
-
-    /**
-     * Converts a base64 encoded string into raw binary (constant-time mode).
-     *
-     * @param  string $string   Base64 string.
-     * @return string           Decoded/raw binary string.
-     * @throws RuntimeException If the Sodium extension is not available, and the polyfill can't be loaded.
-     */
-    public static function cryptoBase64Decode(string $string) {
-        return sodium_base642bin($string, SODIUM_BASE64_VARIANT_ORIGINAL);
-    }
-
 }
