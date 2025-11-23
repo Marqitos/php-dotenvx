@@ -26,9 +26,9 @@ use Rodas\Dotenvx\Provider\KeyProviderInterface;
 use SensitiveParameter;
 
 require_once 'Dotenv/Repository/Adapter/AdapterInterface.php';
-require_once __DIR__ . '/DecryptableAdapter.php';
+require_once __DIR__ . '/DecryptableAdapterInterface.php';
 
-class ArrayAdapter implements AdapterInterface, DecryptableAdapter {
+class ArrayAdapter implements AdapterInterface, DecryptableAdapterInterface {
 # Fields
     /**
      * The variables and their values.
@@ -101,7 +101,7 @@ class ArrayAdapter implements AdapterInterface, DecryptableAdapter {
     }
 # -- Members of Dotenv\Repository\Adapter\WriterInterface
 
-# Members of Dotenv\Repository\Adapter\DecryptableAdapter
+# Members of Dotenv\Repository\Adapter\DecryptableAdapterInterface
     /**
      * Gets de stored values
      *
@@ -173,5 +173,5 @@ class ArrayAdapter implements AdapterInterface, DecryptableAdapter {
         }
     }
 
-# -- Members of Dotenv\Repository\Adapter\DecryptableAdapter
+# -- Members of Dotenv\Repository\Adapter\DecryptableAdapterInterface
 }
