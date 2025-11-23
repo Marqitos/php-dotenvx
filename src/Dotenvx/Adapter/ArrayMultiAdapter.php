@@ -17,15 +17,18 @@ namespace Rodas\Dotenvx\Adapter;
 
 use Dotenv\Repository\Adapter\AdapterInterface;
 use PhpOption\{ None, Option, Some};
+use Rodas\Dotenvx\Decryptor;
+use Rodas\Dotenvx\Provider\KeyProviderInterface;
+use SensitiveParameter;
 
-use function array_merge_recursive;
+use function array_merge;
 use function count;
 use function explode;
 
 /**
  * Read or write de values on a multilevel array
  */
-class ArrayMultiAdapter implements AdapterInterface {
+class ArrayMultiAdapter implements AdapterInterface, DecryptableAdapter {
 # Fields
     /**
      * The variables and their values.
@@ -54,14 +57,6 @@ class ArrayMultiAdapter implements AdapterInterface {
             }
         }
     }
-    /**
-     * Gets de stored values
-     *
-     * @var array<string, mixed>
-     */
-    public array $values {
-        get => $this->variables;
-    }
 # -- Properties
 
 # Constructor
@@ -79,7 +74,7 @@ class ArrayMultiAdapter implements AdapterInterface {
     }
 # -- Constructor
 
-# Methods
+# Members of Dotenv\Repository\Adapter\ReaderInterface
     /**
      * Create a new instance of the adapter.
      *
@@ -90,6 +85,9 @@ class ArrayMultiAdapter implements AdapterInterface {
         return Some::create(new self(self::$defaultSeparator));
     }
 
+## -- Members of Dotenv\Repository\Adapter\ReaderInterface
+
+# Members of Dotenv\Repository\Adapter\WriterInterface
     /**
      * Read a variable from array, if it exists.
      *
@@ -176,8 +174,79 @@ class ArrayMultiAdapter implements AdapterInterface {
 
         return true;
     }
-# -- Methods
+# -- Members of Dotenv\Repository\Adapter\WriterInterface
 
+# Members of Dotenv\Repository\Adapter\DecryptableAdapter
+    /**
+     * Gets de stored values
+     *
+     * @var array<string, mixed>
+     */
+    public array $values {
+        get => $this->variables;
+    }
+
+    public function decrypt(#[SensitiveParameter] KeyProviderInterface $keyProvider): void {
+        foreach ($this->variables as $key => $value) {
+            if ($key == 'DOTENV_PUBLIC_KEY') {
+                continue;
+            }
+            if (is_string($value) &&
+                substr($value, 0, 10) == 'encrypted:') {
+
+                require_once __DIR__ . '/../Decryptor.php';
+                $decryptedValue = Decryptor::decrypt($value, $keyProvider);
+                $this->write($key, $decryptedValue);
+            } elseif (is_array($value)) {
+                $this->decryptLevel($keyProvider, [$key]);
+            }
+        }
+    }
+
+    /**
+     * Return if the adapter contains encrypted values, and there is a public key
+     *
+     * @param  ?string              $publicKey (Optional) The public key used for encryption.
+     * @return string|false                    The public key if encrypted values are found, otherwise false.
+     * @throws RuntimeException                If there isn't public key when encrypted values exist.
+     */
+    public function isEncrypted(?string $publicKey = null): string|false {
+        $hasEncryptedValues = false;
+        // Find public key and encrypted values
+        foreach ($this->variables as $key => $value) {
+            if ($publicKey == null &&
+                !empty($publicKey) &&
+                $hasEncryptedValues) {
+
+                return $publicKey;
+            }
+            if ($key == 'DOTENV_PUBLIC_KEY' &&
+                is_string($value) &&
+                !empty($value)) {
+
+                $publicKey = $value;
+            } elseif (!$hasEncryptedValues &&
+                      is_string($value) &&
+                      substr($value, 0, 10) == 'encrypted:') {
+                $hasEncryptedValues = true;
+            } elseif (!$hasEncryptedValues &&
+                      is_array($value)) {
+                $hasEncryptedValues = $this->isEncryptedLevel([$key]);
+            }
+        }
+        if ($hasEncryptedValues) {
+            if ($publicKey == null ||
+                empty($publicKey)) {
+
+                throw new RuntimeException('PUBLIC KEY not found');
+            }
+            return $publicKey;
+        } else {
+            return false;
+        }
+    }
+
+# Methods
     /**
      * Return a key name from a multilevel xpath
      *
@@ -187,4 +256,59 @@ class ArrayMultiAdapter implements AdapterInterface {
     public function getKey(array $names): string {
         return implode($this->separator, $names);
     }
+
+    /**
+     * Decrypt all encrypted values of the selected an children levels.
+     *
+     * @param  KeyProviderInterface $keyProvider Keys used for decryption.
+     * @param  array<string>        $xPath       The path to the values to decrypt within the ArrayMultiAdapter instance.
+     * @return void
+     */
+    protected function decryptLevel(#[SensitiveParameter] KeyProviderInterface $keyProvider, array $xPath = []): void {
+        $values     = $this->variables;
+        foreach ($xPath as $part) {
+            $values = $values[$part];
+        }
+        foreach ($values as $key => $value) {
+            if (is_string($value) &&
+                substr($value, 0, 10) == 'encrypted:') {
+
+                require_once __DIR__ . '/../Decryptor.php';
+                $decryptedValue = Decryptor::decrypt($value, $keyProvider);
+                $name = $this->getKey(array_merge($xPath, [$key]));
+                $this->write($name, $decryptedValue);
+            } elseif (is_array($value)) {
+                $this->decryptLevel($keyProvider, array_merge($xPath, [$key]));
+            }
+        }
+    }
+
+    /**
+     * Return if the adapter level or children contains encrypted values.
+     *
+     * @param  array<string> $xPath The path to the values to decrypt within the ArrayMultiAdapter instance.
+     * @return bool                 If encrypted values are found, otherwise false.
+     */
+    public function isEncryptedLevel(array $xPath = []): bool {
+        $hasEncryptedValues = false;
+        $values     = $this->variables;
+        foreach ($xPath as $part) {
+            $values = $values[$part];
+        }
+        // Find encrypted values
+        foreach ($values as $key => $value) {
+            if ($hasEncryptedValues) {
+                break;
+            }
+            if (is_string($value) &&
+                      substr($value, 0, 10) == 'encrypted:') {
+                $hasEncryptedValues = true;
+                break;
+            } elseif (is_array($value)) {
+                $hasEncryptedValues = $this->isEncryptedLevel(array_merge($xPath, [$key]));
+            }
+        }
+        return $hasEncryptedValues;
+    }
+# -- Methods
 }
