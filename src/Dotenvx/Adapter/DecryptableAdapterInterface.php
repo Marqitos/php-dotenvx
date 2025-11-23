@@ -21,7 +21,7 @@ use SensitiveParameter;
 /**
  * Represents an adapter that can contain encrypted values
  */
-interface DecryptableAdapter {
+interface DecryptableAdapterInterface {
     /**
      * Gets de stored values
      *

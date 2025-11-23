@@ -28,7 +28,7 @@ use function explode;
 /**
  * Read or write de values on a multilevel array
  */
-class ArrayMultiAdapter implements AdapterInterface, DecryptableAdapter {
+class ArrayMultiAdapter implements AdapterInterface, DecryptableAdapterInterface {
 # Fields
     /**
      * The variables and their values.
@@ -176,7 +176,7 @@ class ArrayMultiAdapter implements AdapterInterface, DecryptableAdapter {
     }
 # -- Members of Dotenv\Repository\Adapter\WriterInterface
 
-# Members of Dotenv\Repository\Adapter\DecryptableAdapter
+# Members of Dotenv\Repository\Adapter\DecryptableAdapterInterface
     /**
      * Gets de stored values
      *
@@ -245,6 +245,7 @@ class ArrayMultiAdapter implements AdapterInterface, DecryptableAdapter {
             return false;
         }
     }
+# -- Members of Dotenv\Repository\Adapter\DecryptableAdapterInterface
 
 # Methods
     /**
