@@ -166,26 +166,6 @@ class ArrayMultiAdapterTest extends TestCase {
      * @covers Rodas\Dotenvx\Provider\StaticKeyProvider
      */
     public function testDecryptFile() {
-        // Find private key
-        $privateEnvKeyFile  = '.env.key';
-        $privateKey         = false;
-        $privateFileExists  = file_exists(self::PATH . '/' . $privateEnvKeyFile);
-        $this->assertTrue($privateFileExists);
-        if ($privateFileExists) {
-            $repository         = RepositoryBuilder::createWithNoAdapters()
-                ->addAdapter(ArrayAdapter::class)
-                ->make();
-            $dotenv             = Dotenv::create($repository, self::PATH, $privateEnvKeyFile);
-            $privateData        = $dotenv->load();
-            $containsPrivateKey = isset($privateData['DOTENV_PRIVATE_KEY']);
-            $this->assertTrue($containsPrivateKey);
-            if ($containsPrivateKey) {
-                $privateKey     = $privateData['DOTENV_PRIVATE_KEY'];
-            }
-            unset($repository, $dotenv, $privateData);
-            $this->assertEquals('/llTiaDfwfYIuVaRI1Ah9T3mWgy2FJVuyRUV0CvPVk8=', $privateKey);
-        }
-
         // Load data
         $envFile            = 'multilevel.env';
         $publicKey          = false;
@@ -209,14 +189,39 @@ class ArrayMultiAdapterTest extends TestCase {
         // Find public key
         $publicKey          = $arrayAdapter->isEncrypted();
         $arrayAdapter->delete('DOTENV_PUBLIC_KEY');
-        $this->assertTrue(is_string($publicKey));
+        $hasPublicKey       = is_string($publicKey);
+        $this->assertTrue($hasPublicKey);
         $this->assertEquals('Ek1Krd8QRcG2B20p1iwM6IHgUVGHyCcudqjqoAgqMQA=', $publicKey);
-        if (is_string($publicKey)) {
-            $this->assertTrue(is_string($privateKey));
+        if ($hasPublicKey) {
+
+            // Find private key
+            $privateEnvKeyFile  = '.env.key';
+            $privateKey         = false;
+            $privateFileExists  = file_exists(self::PATH . '/' . $privateEnvKeyFile);
+            $this->assertTrue($privateFileExists);
+            if ($privateFileExists) {
+                $repository         = RepositoryBuilder::createWithNoAdapters()
+                    ->addAdapter(ArrayAdapter::class)
+                    ->make();
+                $dotenv             = Dotenv::create($repository, self::PATH, $privateEnvKeyFile);
+                $privateData        = $dotenv->load();
+                $containsPrivateKey = isset($privateData['DOTENV_PRIVATE_KEY']);
+                $this->assertTrue($containsPrivateKey);
+                if ($containsPrivateKey) {
+                    $privateKey     = $privateData['DOTENV_PRIVATE_KEY'];
+                }
+                unset($repository, $dotenv, $privateData);
+                $this->assertEquals('/llTiaDfwfYIuVaRI1Ah9T3mWgy2FJVuyRUV0CvPVk8=', $privateKey);
+            }
+
+            $hasPrivateKey      = is_string($privateKey);
+            $this->assertTrue($hasPrivateKey);
             // Decrypt data
-            if (is_string($privateKey)) {
+            if ($hasPrivateKey) {
                 $staticKeyProvider  = new StaticKeyProvider($publicKey, $privateKey);
                 $arrayAdapter->decrypt($staticKeyProvider);
+                $isEncrypted        = $arrayAdapter->isEncrypted();
+                $this->assertFalse($isEncrypted);
             } else {
                 throw new Exception('Private key not found');
             }
