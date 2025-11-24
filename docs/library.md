@@ -1,17 +1,19 @@
 # Library details
 
-- Rodas\Dotenvx\Decryptor _(class)_
-- Rodas\Dotenvx\Adapter\ArrayAdapter _(class)_
-- Rodas\Dotenvx\Adapter\ArrayMultiAdapter _(class)_
-- Rodas\Dotenvx\Provider\KeyProviderInterface _(interface)_
-- Rodas\Dotenvx\Provider\StaticKeyProvider _(class)_
+- Rodas\Dotenvx\\[Decryptor](https://github.com/Marqitos/php-dotenvx/blob/main/docs/Decryptor.md) _(class)_
+- Rodas\Dotenvx\Adapter\\[ArrayAdapter](https://github.com/Marqitos/php-dotenvx/blob/main/docs/Adapter/ArrayAdapter.md) _(class)_
+- Rodas\Dotenvx\Adapter\\[ArrayMultiAdapter](https://github.com/Marqitos/php-dotenvx/blob/main/docs/Adapter/ArrayMultiAdapter.md) _(class)_
+- Rodas\Dotenvx\Adapter\\[DecryptableAdapterInterface](https://github.com/Marqitos/php-dotenvx/blob/main/docs/Adapter/DecryptableAdapterInterface.md) _(interface)_
+- Rodas\Dotenvx\Provider\\[KeyProviderInterface](https://github.com/Marqitos/php-dotenvx/blob/main/docs/Adapter/KeyProviderInterface.md) _(interface)_
+- Rodas\Dotenvx\Provider\\[StaticKeyProvider](https://github.com/Marqitos/php-dotenvx/blob/main/docs/Adapter/StaticKeyProvider.md) _(class)_
 
 ```text
 src/Dotenvx/             (Rodas\Dotenvx\ namespace)
 ├── Decryptor.php
 ├── Adapter/
 │   ├── ArrayAdapter.php
-│   └── ArrayMultiAdapter.php
+│   ├── ArrayMultiAdapter.php
+│   └── DecryptableAdapterInterface.php
 └── Provider/
     ├── KeyProviderInterface.php
     └── StaticKeyProvider.php

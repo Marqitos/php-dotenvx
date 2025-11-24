@@ -28,7 +28,7 @@ class StaticKeyProvider implements KeyProviderInterface {
      * @param string $publicKey  Encryption public key
      * @param string $privateKey Decryption private key
      */
-    public function __construct(string $publicKey, string $privateKey) {
+    public function __construct(string $publicKey,#[SensitiveParameter] string $privateKey) {
         $this->publicKey = $publicKey;
         $this->privateKey = $privateKey;
     }

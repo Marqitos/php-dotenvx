@@ -25,6 +25,9 @@ use Rodas\Dotenvx\Decryptor;
 use Rodas\Dotenvx\Provider\KeyProviderInterface;
 use SensitiveParameter;
 
+/**
+ * Read or write de values on a array, and with the ability to decrypt its contents
+ */
 class ArrayAdapter implements AdapterInterface, DecryptableAdapterInterface {
 # Fields
     /**

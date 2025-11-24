@@ -26,7 +26,7 @@ use function count;
 use function explode;
 
 /**
- * Read or write de values on a multilevel array
+ * Read or write de values on a multilevel array, and with the ability to decrypt its contents
  */
 class ArrayMultiAdapter implements AdapterInterface, DecryptableAdapterInterface {
 # Fields
@@ -37,7 +37,7 @@ class ArrayMultiAdapter implements AdapterInterface, DecryptableAdapterInterface
      */
     private array $variables;
     /**
-     * Key to array level separator, for use with self::create()
+     * Char to split the name into keys, for use with self::create()
      *
      * @var string
      */
@@ -46,7 +46,7 @@ class ArrayMultiAdapter implements AdapterInterface, DecryptableAdapterInterface
 
 # Properties
     /**
-     * Char to split the name into keys
+     * Get the char to split the name into keys
      *
      * @var string
      */
@@ -61,9 +61,9 @@ class ArrayMultiAdapter implements AdapterInterface, DecryptableAdapterInterface
 
 # Constructor
     /**
-     * Create a new array adapter instance.
+     * Create a new array multi-level adapter instance.
      *
-     * @param string $separator Key to array level separator
+     * @param string $separator Char to split the name into keys
      */
     public function __construct(string $separator) {
         $this->variables = [];

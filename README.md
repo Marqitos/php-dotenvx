@@ -44,7 +44,11 @@ environment.
 This library also provides an adapter to dump the `.env` values ​​into
 an array and a multi-level array.
 
+## How to use
+
+See [the documentation](https://github.com/Marqitos/php-dotenvx/blob/main/docs/quickstart.md).
+
 ---
 
 Under the hood,
-this is all implemented using the same public-key cryptography as Bitcoin.
+this is all implemented using the same public-key cryptography as [Bitcoin](https://en.bitcoin.it/wiki/Secp256k1).
