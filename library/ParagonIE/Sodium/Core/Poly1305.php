@@ -5,11 +5,16 @@ if (class_exists('ParagonIE_Sodium_Core_Poly1305', false)) {
     return;
 }
 
+require_once __DIR__ . '/Util.php';
+
 /**
  * Class ParagonIE_Sodium_Core_Poly1305
  */
 abstract class ParagonIE_Sodium_Core_Poly1305 extends ParagonIE_Sodium_Core_Util
 {
+
+    const R_PARAGONIE_SODIUM_CORE_POLY1305_STATE    = __DIR__ . '/Poly1305/State.php';
+
     const BLOCK_SIZE = 16;
 
     /**
@@ -31,6 +36,7 @@ abstract class ParagonIE_Sodium_Core_Poly1305 extends ParagonIE_Sodium_Core_Util
                 'Key must be 32 bytes long.'
             );
         }
+        require_once self::R_PARAGONIE_SODIUM_CORE_POLY1305_STATE;
         $state = new ParagonIE_Sodium_Core_Poly1305_State(
             self::substr($key, 0, 32)
         );
@@ -60,6 +66,7 @@ abstract class ParagonIE_Sodium_Core_Poly1305 extends ParagonIE_Sodium_Core_Util
                 'Key must be 32 bytes long.'
             );
         }
+        require_once self::R_PARAGONIE_SODIUM_CORE_POLY1305_STATE;
         $state = new ParagonIE_Sodium_Core_Poly1305_State(
             self::substr($key, 0, 32)
         );

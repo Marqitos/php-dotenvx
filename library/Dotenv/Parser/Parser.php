@@ -26,6 +26,7 @@ final class Parser implements ParserInterface
         return Regex::split("/(\r\n|\n|\r)/", $content)->mapError(static function () {
             return 'Could not split into separate lines.';
         })->flatMap(static function (array $lines) {
+            require_once __DIR__ . '/Lines.php';
             return self::process(Lines::process($lines));
         })->mapError(static function (string $error) {
             require_once __DIR__ . '/../Exception/InvalidFileException.php';

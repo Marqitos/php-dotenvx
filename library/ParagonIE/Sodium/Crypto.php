@@ -19,6 +19,7 @@ abstract class ParagonIE_Sodium_Crypto
     const R_PARAGONIE_SODIUM_CORE_BLAKE2B           = __DIR__ . '/Core/BLAKE2b.php';
     const R_PARAGONIE_SODIUM_CORE_HSALSA20          = __DIR__ . '/Core/HSalsa20.php';
     const R_PARAGONIE_SODIUM_CORE_POLY1305_STATE    = __DIR__ . '/Core/Poly1305/State.php';
+    const R_PARAGONIE_SODIUM_CORE_POLY1305          = __DIR__ . '/Core/Poly1305.php';
 
     const aead_chacha20poly1305_KEYBYTES = 32;
     const aead_chacha20poly1305_NSECBYTES = 0;
@@ -1092,6 +1093,7 @@ abstract class ParagonIE_Sodium_Crypto
         string $key
     ): string {
         require_once self::R_PARAGONIE_SODIUM_CORE_HSALSA20;
+        require_once self::R_PARAGONIE_SODIUM_CORE_POLY1305;
         $mac = ParagonIE_Sodium_Core_Util::substr(
             $ciphertext,
             0,
