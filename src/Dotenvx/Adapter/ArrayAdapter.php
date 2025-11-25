@@ -25,6 +25,10 @@ use Rodas\Dotenvx\Decryptor;
 use Rodas\Dotenvx\Provider\KeyProviderInterface;
 use SensitiveParameter;
 
+use function array_unique;
+use function is_string;
+use function substr;
+
 /**
  * Read or write de values on a array, and with the ability to decrypt its contents
  */
@@ -129,6 +133,24 @@ class ArrayAdapter implements AdapterInterface, DecryptableAdapterInterface {
             }
         }
     }
+    
+    /**
+     * Return all encrypted values as base64 encoded strings
+     *
+     * @return array<string>
+     */
+    public function getEncryptedValues(): array {
+        $encryptedValues = [];
+        // Find encrypted values
+        foreach ($this->variables as $value) {
+            if (is_string($value) &&
+                substr($value, 0, 10) == 'encrypted:') {
+
+                $encryptedValues[] = substr($value, 10);
+            }
+        }
+        return array_unique($encryptedValues);
+    }
 
     /**
      * Return if the adapter contains encrypted values, and there is a public key
@@ -171,5 +193,28 @@ class ArrayAdapter implements AdapterInterface, DecryptableAdapterInterface {
         }
     }
 
+    /**
+     * Replace encrypted values with decrypted values
+     *
+     * @param  array<string, mixed> $values Decrypted values, encrypted values as keys.
+     * @return bool                         Still contains encrypted values after replacement.
+     */
+    public function replaceEncryptedValues(#[SensitiveParameter] array $decryptedValues): bool {
+        $hasEncryptedValues = false;
+        // Find encrypted values
+        foreach ($this->variables as $key => $value) {
+            if (is_string($value) &&
+                substr($value, 0, 10) == 'encrypted:') {
+
+                $encrypted = substr($value, 10);
+                if (isset($decryptedValues[$encrypted])) {
+                    $this->write($key, $decryptedValues[$encrypted]);
+                } else {
+                    $hasEncryptedValues = true;
+                }
+            }
+        }
+        return $hasEncryptedValues;
+    }
 # -- Members of Dotenv\Repository\Adapter\DecryptableAdapterInterface
 }

@@ -38,6 +38,13 @@ interface DecryptableAdapterInterface {
     public function decrypt(#[SensitiveParameter] KeyProviderInterface $keyProvider): void;
 
     /**
+     * Return all encrypted values as base64 encoded strings
+     *
+     * @return array<string>
+     */
+    public function getEncryptedValues(): array;
+
+    /**
      * Return if contains encrypted values, and there is a public key
      *
      * @param  ?string              $publicKey (Optional) The public key used for encryption.
@@ -45,4 +52,12 @@ interface DecryptableAdapterInterface {
      * @throws RuntimeException                If there isn't public key when encrypted values exist.
      */
     public function isEncrypted(?string $publicKey = null): string|false;
+
+    /**
+     * Replace encrypted values with decrypted values
+     *
+     * @param  array<string, mixed> $values Decrypted values, encrypted values as keys.
+     * @return bool                         Still contains encrypted values after replacement.
+     */
+    public function replaceEncryptedValues(#[SensitiveParameter] array $decryptedValues): bool;
 }

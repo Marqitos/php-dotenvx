@@ -18,10 +18,12 @@ namespace Rodas\Test\Dotenvx\Adapter;
 
 use Dotenv\Dotenv;
 use Dotenv\Repository\RepositoryBuilder;
+use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Rodas\Dotenvx\Adapter\ArrayAdapter;
 use Rodas\Dotenvx\Adapter\ArrayMultiAdapter;
 use Rodas\Dotenvx\Provider\StaticKeyProvider;
+use Rodas\Test\Dotenvx\FakeDecrypt;
 
 use function file_exists;
 use function in_array;
@@ -136,25 +138,7 @@ class ArrayMultiAdapterTest extends TestCase {
      * @covers Rodas\Dotenvx\Adapter\ArrayMultiAdapter->values
      */
     public function testReadFile() {
-        $envFile            = 'multilevel.env';
-        $envFileExists      = file_exists(self::PATH . '/' . $envFile);
-        $this->assertTrue($envFileExists);
-        if ($envFileExists) {
-            $arrayAdapter       = new ArrayMultiAdapter('.');
-            $repository         = RepositoryBuilder::createWithNoAdapters()
-                ->addAdapter($arrayAdapter)
-                ->make();
-            Dotenv::create($repository, self::PATH, $envFile)->load();
-            $options            = $arrayAdapter->values;
-            $this->assertEquals('Ek1Krd8QRcG2B20p1iwM6IHgUVGHyCcudqjqoAgqMQA='                                          , $options['DOTENV_PUBLIC_KEY']);
-            $this->assertEquals('pdo_mysql'                                                                             , $options['DB']['DRIVER']);
-            $this->assertEquals('encrypted:kpOFCd76bsEMvgk7iJ1a7oHbQdGITAMAtUppEIBgRmUjinhWoxaKJD9Xz1SqKEwSGAlnuWhXksv1', $options['DB']['HOST']);        // localhost
-            $this->assertEquals('encrypted:k4hknNltlTjry3LFPsM3dtHkQdfJhWRRCK+X21JE6xAjg0xI3bT3rSXfJ9rdesIXWxYFzw=='    , $options['DB']['PORT']);        // 3306
-            $this->assertEquals('encrypted:XZA6xt1uXF1OdDrROuvC5+zVD/3OwXaj9dgPGdkF0QFUaNfCFTcCsmJl7V5e9I7w39egprAOXJg=', $options['DB']['USER']);        // username
-            $this->assertEquals('encrypted:iRJUQ3XaVQnhsUfea2i1NgZWb593oWXhjksHDeC2yzZFPKTsU7UC+D/vxDksSkDFff12oAqzVXk=', $options['DB']['PASSWORD']);    // 'pa$$w0rd'
-            $this->assertEquals('utf8mb4'                                                                               , $options['DB']['CHARSET']);
-            $this->assertTrue(in_array('primary', $options['DB']));
-        }
+        self::loadFile($this);
     }
 
     /**
@@ -167,24 +151,7 @@ class ArrayMultiAdapterTest extends TestCase {
      */
     public function testDecryptFile() {
         // Load data
-        $envFile            = 'multilevel.env';
-        $publicKey          = false;
-        $envFileExists      = file_exists(self::PATH . '/' . $envFile);
-        $arrayAdapter       = new ArrayMultiAdapter('.');
-        $this->assertTrue($envFileExists);
-        if ($envFileExists) {
-            $repository         = RepositoryBuilder::createWithNoAdapters()
-                ->addAdapter($arrayAdapter)
-                ->make();
-            Dotenv::create($repository, self::PATH, $envFile)->load();
-            $this->assertEquals('pdo_mysql'                                                                             , $arrayAdapter->values['DB']['DRIVER']);
-            $this->assertEquals('encrypted:kpOFCd76bsEMvgk7iJ1a7oHbQdGITAMAtUppEIBgRmUjinhWoxaKJD9Xz1SqKEwSGAlnuWhXksv1', $arrayAdapter->values['DB']['HOST']);        // localhost
-            $this->assertEquals('encrypted:k4hknNltlTjry3LFPsM3dtHkQdfJhWRRCK+X21JE6xAjg0xI3bT3rSXfJ9rdesIXWxYFzw=='    , $arrayAdapter->values['DB']['PORT']);        // 3306
-            $this->assertEquals('encrypted:XZA6xt1uXF1OdDrROuvC5+zVD/3OwXaj9dgPGdkF0QFUaNfCFTcCsmJl7V5e9I7w39egprAOXJg=', $arrayAdapter->values['DB']['USER']);        // username
-            $this->assertEquals('encrypted:iRJUQ3XaVQnhsUfea2i1NgZWb593oWXhjksHDeC2yzZFPKTsU7UC+D/vxDksSkDFff12oAqzVXk=', $arrayAdapter->values['DB']['PASSWORD']);    // 'pa$$w0rd'
-            $this->assertEquals('utf8mb4'                                                                               , $arrayAdapter->values['DB']['CHARSET']);
-            $this->assertTrue(in_array('primary', $arrayAdapter->values['DB']));
-        }
+        $arrayAdapter       = self::loadFile($this);
 
         // Find public key
         $publicKey          = $arrayAdapter->isEncrypted();
@@ -236,5 +203,66 @@ class ArrayMultiAdapterTest extends TestCase {
         $this->assertEquals('pa$$w0rd'  , $options['DB']['PASSWORD']);
         $this->assertEquals('utf8mb4'   , $options['DB']['CHARSET']);
         $this->assertTrue(in_array('primary', $options['DB']));
+    }
+
+    /**
+     * Test ArrayMultiAdapter::replaceEncryptedValues
+     *
+     * @covers Rodas\Dotenvx\Adapter\ArrayMultiAdapter->getEncryptedValues
+     * @covers Rodas\Dotenvx\Adapter\ArrayMultiAdapter->isEncrypted
+     * @covers Rodas\Dotenvx\Adapter\ArrayMultiAdapter->replaceEncryptedValues
+     */
+    public function testReplaceEncryptedValues() {
+        // Load data
+        $arrayAdapter       = self::loadFile($this);
+
+        // Find public key
+        $publicKey          = $arrayAdapter->isEncrypted();
+        $arrayAdapter->delete('DOTENV_PUBLIC_KEY');
+        $hasPublicKey       = is_string($publicKey);
+        $this->assertTrue($hasPublicKey);
+        $this->assertEquals('Ek1Krd8QRcG2B20p1iwM6IHgUVGHyCcudqjqoAgqMQA=', $publicKey);
+        if ($hasPublicKey) {
+
+            // Decrypt data
+            $encryptedValues    = $arrayAdapter->getEncryptedValues();
+            $decryptedValues    = FakeDecrypt::decrypt($publicKey, $encryptedValues);
+            $isEncrypted        = $arrayAdapter->replaceEncryptedValues($decryptedValues);
+            $this->assertFalse($isEncrypted);
+        }
+
+        // Validate values
+        $options            = $arrayAdapter->values;
+        $this->assertEquals('pdo_mysql' , $options['DB']['DRIVER']);
+        $this->assertEquals('localhost' , $options['DB']['HOST']);
+        $this->assertEquals('3306'      , $options['DB']['PORT']);
+        $this->assertEquals('username'  , $options['DB']['USER']);
+        $this->assertEquals('pa$$w0rd'  , $options['DB']['PASSWORD']);
+        $this->assertEquals('utf8mb4'   , $options['DB']['CHARSET']);
+        $this->assertTrue(in_array('primary', $options['DB']));
+    }
+
+    public static function loadFile(Assert $assert): ArrayMultiAdapter {
+        $envFile            = 'multilevel.env';
+        $envFileExists      = file_exists(self::PATH . '/' . $envFile);
+        $arrayAdapter       = new ArrayMultiAdapter('.');
+        $assert->assertTrue($envFileExists);
+        if ($envFileExists) {
+            $repository         = RepositoryBuilder::createWithNoAdapters()
+                ->addAdapter($arrayAdapter)
+                ->make();
+            Dotenv::create($repository, self::PATH, $envFile)->load();
+            $options            = $arrayAdapter->values;
+            $assert->assertEquals('Ek1Krd8QRcG2B20p1iwM6IHgUVGHyCcudqjqoAgqMQA='                                          , $options['DOTENV_PUBLIC_KEY']);
+            $assert->assertEquals('pdo_mysql'                                                                             , $options['DB']['DRIVER']);
+            $assert->assertEquals('encrypted:kpOFCd76bsEMvgk7iJ1a7oHbQdGITAMAtUppEIBgRmUjinhWoxaKJD9Xz1SqKEwSGAlnuWhXksv1', $options['DB']['HOST']);        // localhost
+            $assert->assertEquals('encrypted:k4hknNltlTjry3LFPsM3dtHkQdfJhWRRCK+X21JE6xAjg0xI3bT3rSXfJ9rdesIXWxYFzw=='    , $options['DB']['PORT']);        // 3306
+            $assert->assertEquals('encrypted:XZA6xt1uXF1OdDrROuvC5+zVD/3OwXaj9dgPGdkF0QFUaNfCFTcCsmJl7V5e9I7w39egprAOXJg=', $options['DB']['USER']);        // username
+            $assert->assertEquals('encrypted:iRJUQ3XaVQnhsUfea2i1NgZWb593oWXhjksHDeC2yzZFPKTsU7UC+D/vxDksSkDFff12oAqzVXk=', $options['DB']['PASSWORD']);    // 'pa$$w0rd'
+            $assert->assertEquals('utf8mb4'                                                                               , $options['DB']['CHARSET']);
+            $assert->assertTrue(in_array('primary', $options['DB']));
+        }
+
+        return $arrayAdapter;
     }
 }
