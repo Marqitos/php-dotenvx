@@ -17,7 +17,9 @@ classDiagram
     class DecryptableAdapterInterface{
         array values
         ->decrypt()
+        ->getEncryptedValues()
         ->isEncrypted()
+        ->replaceEncryptedValues()
     }
     class AdapterInterface{
         ->create()

@@ -301,7 +301,7 @@ class ArrayMultiAdapter implements AdapterInterface, DecryptableAdapterInterface
     /**
      * Return a key name from a multilevel xpath
      *
-     * @param  array $names
+     * @param  array<string> $names
      * @return string
      */
     public function getKey(array $names): string {
@@ -311,7 +311,8 @@ class ArrayMultiAdapter implements AdapterInterface, DecryptableAdapterInterface
     /**
      * Return all encrypted values as base64 encoded strings of the selected an children levels.
      *
-     * @return array<string>
+     * @param array<string>  $xPath The path to the values to decrypt within the ArrayMultiAdapter instance.
+     * @return array<string>        All encrypted values as base64 encoded strings of the selected an children levels.
      */
     public function getEncryptedValuesLevel(array $xPath = []): array {
         $encryptedValues = [];

@@ -40,7 +40,7 @@ interface DecryptableAdapterInterface {
     /**
      * Return all encrypted values as base64 encoded strings
      *
-     * @return array<string>
+     * @return array<string> All encrypted values as base64 encoded strings
      */
     public function getEncryptedValues(): array;
 

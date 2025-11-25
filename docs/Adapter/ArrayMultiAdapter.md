@@ -17,11 +17,16 @@ classDiagram
         string ::defaultSeparator
         string separator
         ::__construct()
+        ->getKey()
+        ->getEncryptedValuesLevel()
+        ->isEncryptedLevel()
     }
     class DecryptableAdapterInterface{
         array values
         ->decrypt()
+        ->getEncryptedValues()
         ->isEncrypted()
+        ->replaceEncryptedValues()
     }
     class AdapterInterface{
         ->create()
@@ -55,16 +60,46 @@ array $separator { get; }
 
 ## Methods
 
-Create a new array multi-level adapter instance.
-
 ### __construct
+
+Create a new array multi-level adapter instance.
 
 ```php
 function __construct(string $separator)
 ```
 
 - `@param string $separator` Char to split the name into keys
-- `@return ArrayMultiAdapter`
+
+### getKey
+
+```php
+function getKey(array $names): string
+```
+
+- `@param array<string> $names`
+- `@return string`
+
+### getEncryptedValuesLevel
+
+```php
+function getEncryptedValuesLevel(array $xPath = []): array
+```
+
+- `@param array<string>  $xPath`
+The path to the values to decrypt within the ArrayMultiAdapter instance.
+- `@return array<string>`
+All encrypted values as base64 encoded strings of the selected an children levels.
+
+### isEncryptedLevel
+
+```php
+function isEncryptedLevel(array $xPath = []): bool
+```
+
+- `@param  array<string> $xPath`
+The path to the values to decrypt within the ArrayMultiAdapter instance.
+- `@return bool`
+If encrypted values are found, otherwise false.
 
 ---
 
