@@ -52,3 +52,9 @@ See [the documentation](https://github.com/Marqitos/php-dotenvx/blob/main/docs/q
 
 Under the hood,
 this is all implemented using the same public-key cryptography as [Bitcoin](https://en.bitcoin.it/wiki/Secp256k1).
+
+---
+
+📦 Available at Packagist: [rodas/dotenvx](https://packagist.org/packages/rodas/dotenvx)
+
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Marqitos/php-dotenvx)

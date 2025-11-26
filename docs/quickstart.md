@@ -9,16 +9,27 @@ stateDiagram-v2
     state "Load data" as load
     state "Is encrypted?" as isEncrypted
     state is_encrypted <<choice>>
+    state "Has decryptor in other environment?" as hasExternal
+    state has_external <<choice>>
     state "Get private key" as private
-    state "Decrypt data" as decrypt
+    state "Decrypt values with private key" as decryptPrivate
+    state "Get encrypted values" as getValues
+    state "Replace encrypted values" as replace
+    state "Decrypt values" as decrypt
     state "Get or use values" as use 
     [*] --> load
     load --> isEncrypted
     isEncrypted --> is_encrypted
     is_encrypted --> use: False
-    is_encrypted --> private: True
-    private --> decrypt
-    decrypt --> use
+    is_encrypted --> hasExternal: True
+    hasExternal --> has_external
+    has_external --> getValues: True
+    has_external --> private: False
+    getValues --> decrypt
+    decrypt --> replace
+    replace --> use
+    private --> decryptPrivate
+    decryptPrivate --> use
     use --> [*]
 ```
 
