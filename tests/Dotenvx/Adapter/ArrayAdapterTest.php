@@ -16,11 +16,11 @@ declare(strict_types=1);
 
 namespace Rodas\Test\Dotenvx\Adapter;
 
-use Dotenv\Dotenv;
 use Dotenv\Repository\RepositoryBuilder;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Rodas\Dotenvx\Adapter\ArrayAdapter;
+use Rodas\Dotenvx\Dotenvx;
 use Rodas\Dotenvx\Provider\StaticKeyProvider;
 use Rodas\Test\Dotenvx\FakeDecrypt;
 
@@ -105,6 +105,7 @@ class ArrayAdapterTest extends TestCase {
     /**
      * Test ArrayAdapter::decrypt
      *
+     * @covers Rodas\Dotenvx::createArrayBacked
      * @covers Rodas\Dotenvx\Adapter\ArrayAdapter->decrypt
      * @covers Rodas\Dotenvx\Adapter\ArrayAdapter->isEncrypted
      * @covers Rodas\Dotenvx\Provider\StaticKeyProvider
@@ -127,11 +128,7 @@ class ArrayAdapterTest extends TestCase {
             $privateFileExists  = file_exists(self::PATH . '/' . $privateEnvKeyFile);
             $this->assertTrue($privateFileExists);
             if ($privateFileExists) {
-                $repository         = RepositoryBuilder::createWithNoAdapters()
-                    ->addAdapter(ArrayAdapter::class)
-                    ->make();
-                $dotenv             = Dotenv::create($repository, self::PATH, $privateEnvKeyFile);
-                $privateData        = $dotenv->load();
+                $privateData        = Dotenvx::createArrayBacked(self::PATH, $privateEnvKeyFile)->load();
                 $containsPrivateKey = isset($privateData['DOTENV_PRIVATE_KEY']);
                 $this->assertTrue($containsPrivateKey);
                 if ($containsPrivateKey) {
@@ -208,7 +205,7 @@ class ArrayAdapterTest extends TestCase {
             $repository         = RepositoryBuilder::createWithNoAdapters()
                 ->addAdapter($arrayAdapter)
                 ->make();
-            Dotenv::create($repository, self::PATH)->load();
+            Dotenvx::create($repository, self::PATH)->load();
             $options            = $arrayAdapter->values;
             $assert->assertEquals('Ek1Krd8QRcG2B20p1iwM6IHgUVGHyCcudqjqoAgqMQA='                                          , $options['DOTENV_PUBLIC_KEY']);
             $assert->assertEquals('pdo_mysql'                                                                             , $options['DB_DRIVER']);

@@ -23,13 +23,12 @@ use Dotenv\Loader\Loader;
 use Dotenv\Loader\LoaderInterface;
 use Dotenv\Parser\Parser;
 use Dotenv\Parser\ParserInterface;
-use Dotenv\Repository\Adapter\ArrayAdapter;
-use Dotenv\Repository\Adapter\PutenvAdapter;
 use Dotenv\Repository\RepositoryBuilder;
 use Dotenv\Repository\RepositoryInterface;
 use Dotenv\Store\StoreBuilder;
 use Dotenv\Store\StoreInterface;
 use Dotenv\Store\StringStore;
+use Rodas\Dotenvx\Adapter\ArrayAdapter;
 use Rodas\Dotenvx\Parser\EntriesExtensions;
 
 use function call_user_func;
@@ -64,7 +63,7 @@ class Dotenvx {
      * @var \Dotenv\Repository\RepositoryInterface
      */
     protected $repository;
-    
+
     /**
      * Create a new dotenvx instance.
      *
@@ -72,8 +71,6 @@ class Dotenvx {
      * @param \Dotenv\Parser\ParserInterface         $parser
      * @param \Dotenv\Loader\LoaderInterface         $loader
      * @param \Dotenv\Repository\RepositoryInterface $repository
-     *
-     * @return void
      */
     public function __construct(
         StoreInterface $store,
@@ -96,7 +93,7 @@ class Dotenvx {
      * @param bool                                   $shortCircuit
      * @param string|null                            $fileEncoding
      *
-     * @return \Dotenv\Dotenv
+     * @return Rodas\Dotenvx\Dotenvx
      */
     public static function create(RepositoryInterface $repository, $paths, $names = null, bool $shortCircuit = true, ?string $fileEncoding = null) {
         $builder = $names === null ? StoreBuilder::createWithDefaultName() : StoreBuilder::createWithNoNames();
@@ -113,7 +110,7 @@ class Dotenvx {
             $builder = $builder->shortCircuit();
         }
 
-        return new self($builder->fileEncoding($fileEncoding)->make(), new Parser(), new Loader(), $repository);
+        return new static($builder->fileEncoding($fileEncoding)->make(), new Parser(), new Loader(), $repository);
     }
 
     /**
@@ -124,30 +121,12 @@ class Dotenvx {
      * @param bool                 $shortCircuit
      * @param string|null          $fileEncoding
      *
-     * @return \Dotenv\Dotenv
+     * @return Rodas\Dotenvx\Dotenvx
      */
     public static function createMutable($paths, $names = null, bool $shortCircuit = true, ?string $fileEncoding = null) {
         $repository = RepositoryBuilder::createWithDefaultAdapters()->make();
 
-        return self::create($repository, $paths, $names, $shortCircuit, $fileEncoding);
-    }
-
-    /**
-     * Create a new mutable dotenv instance with default repository with the putenv adapter.
-     *
-     * @param string|string[]      $paths
-     * @param string|string[]|null $names
-     * @param bool                 $shortCircuit
-     * @param string|null          $fileEncoding
-     *
-     * @return \Dotenv\Dotenv
-     */
-    public static function createUnsafeMutable($paths, $names = null, bool $shortCircuit = true, ?string $fileEncoding = null) {
-        $repository = RepositoryBuilder::createWithDefaultAdapters()
-            ->addAdapter(PutenvAdapter::class)
-            ->make();
-
-        return self::create($repository, $paths, $names, $shortCircuit, $fileEncoding);
+        return static::create($repository, $paths, $names, $shortCircuit, $fileEncoding);
     }
 
     /**
@@ -158,31 +137,12 @@ class Dotenvx {
      * @param bool                 $shortCircuit
      * @param string|null          $fileEncoding
      *
-     * @return \Dotenv\Dotenv
+     * @return Rodas\Dotenvx\Dotenvx
      */
     public static function createImmutable($paths, $names = null, bool $shortCircuit = true, ?string $fileEncoding = null) {
         $repository = RepositoryBuilder::createWithDefaultAdapters()->immutable()->make();
 
-        return self::create($repository, $paths, $names, $shortCircuit, $fileEncoding);
-    }
-
-    /**
-     * Create a new immutable dotenv instance with default repository with the putenv adapter.
-     *
-     * @param string|string[]      $paths
-     * @param string|string[]|null $names
-     * @param bool                 $shortCircuit
-     * @param string|null          $fileEncoding
-     *
-     * @return \Dotenv\Dotenv
-     */
-    public static function createUnsafeImmutable($paths, $names = null, bool $shortCircuit = true, ?string $fileEncoding = null) {
-        $repository = RepositoryBuilder::createWithDefaultAdapters()
-            ->addAdapter(PutenvAdapter::class)
-            ->immutable()
-            ->make();
-
-        return self::create($repository, $paths, $names, $shortCircuit, $fileEncoding);
+        return static::create($repository, $paths, $names, $shortCircuit, $fileEncoding);
     }
 
     /**
@@ -193,12 +153,12 @@ class Dotenvx {
      * @param bool                 $shortCircuit
      * @param string|null          $fileEncoding
      *
-     * @return \Dotenv\Dotenv
+     * @return Rodas\Dotenvx\Dotenvx
      */
     public static function createArrayBacked($paths, $names = null, bool $shortCircuit = true, ?string $fileEncoding = null) {
         $repository = RepositoryBuilder::createWithNoAdapters()->addAdapter(ArrayAdapter::class)->make();
 
-        return self::create($repository, $paths, $names, $shortCircuit, $fileEncoding);
+        return static::create($repository, $paths, $names, $shortCircuit, $fileEncoding);
     }
 
     /**
@@ -213,10 +173,10 @@ class Dotenvx {
      *
      * @return array<string, string|null>
      */
-    public static function parse(string $content) {
+    public static function parse(string $content): array {
         $repository = RepositoryBuilder::createWithNoAdapters()->addAdapter(ArrayAdapter::class)->make();
 
-        $phpdotenv = new self(new StringStore($content), new Parser(), new Loader(), $repository);
+        $phpdotenv = new static(new StringStore($content), new Parser(), new Loader(), $repository);
 
         return $phpdotenv->load();
     }
@@ -228,8 +188,27 @@ class Dotenvx {
      *
      * @return array<string, string|null>
      */
-    public function load() {
+    public function load(): array {
         $entries = $this->parser->parse($this->store->read());
+
+        return $this->loader->load($this->repository, $entries);
+    }
+
+    /**
+     * Read, decrypt and load environment file(s).
+     *
+     * @param  callable $decryptor Callable with the signature `function(string $publicKey, array $encryptedValues): array`
+     * @return array<string, string|null>
+     */
+    public function loadEncrypted(callable $decryptor): array {
+        $entries = $this->parser->parse($this->store->read());
+        $publicKey = EntriesExtensions::isEncrypted($entries);
+
+        if (is_string($publicKey)) {
+            $encryptedValues    = EntriesExtensions::getEncryptedValues($entries);
+            $decryptedValues    = call_user_func($decryptor, $publicKey, $encryptedValues);
+            $entries            = EntriesExtensions::replaceEncryptedValues($entries, $decryptedValues);
+        }
 
         return $this->loader->load($this->repository, $entries);
     }
@@ -241,7 +220,7 @@ class Dotenvx {
      *
      * @return array<string, string|null>
      */
-    public function safeLoad() {
+    public function safeLoad(): array {
         try {
             return $this->load();
         } catch (InvalidPathException $e) {
@@ -250,17 +229,21 @@ class Dotenvx {
         }
     }
 
-    public function loadEncrypted(callable $decryptor) {
-        $entries = $this->parser->parse($this->store->read());
-        $publicKey = EntriesExtensions::isEncrypted($entries);
-
-        if (is_string($publicKey)) {
-            $encryptedValues    = EntriesExtensions::getEncryptedValues($entries);
-            $decryptedValues    = call_user_func($decryptor, $publicKey, $encryptedValues);
-            $entries            = EntriesExtensions::replaceEncryptedValues($entries, $decryptedValues);
+    /**
+     * Read, decrypt and load environment file(s), silently failing if no files can be read.
+     *
+     * @param  callable $decryptor Callable with the signature `function(string $publicKey, array $encryptedValues): array`
+     * @throws \Dotenv\Exception\InvalidEncodingException|\Dotenv\Exception\InvalidFileException
+     *
+     * @return array<string, string|null>
+     */
+    public function safeLoadEncrypted(callable $decryptor): array {
+        try {
+            return $this->loadEncrypted($decryptor);
+        } catch (InvalidPathException $e) {
+            // suppressing exception
+            return [];
         }
-
-        return $this->loader->load($this->repository, $entries);
     }
 
     /**

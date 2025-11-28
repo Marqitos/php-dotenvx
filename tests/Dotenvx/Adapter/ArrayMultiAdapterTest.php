@@ -16,12 +16,12 @@ declare(strict_types=1);
 
 namespace Rodas\Test\Dotenvx\Adapter;
 
-use Dotenv\Dotenv;
 use Dotenv\Repository\RepositoryBuilder;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Rodas\Dotenvx\Adapter\ArrayAdapter;
 use Rodas\Dotenvx\Adapter\ArrayMultiAdapter;
+use Rodas\Dotenvx\Dotenvx;
 use Rodas\Dotenvx\Provider\StaticKeyProvider;
 use Rodas\Test\Dotenvx\FakeDecrypt;
 
@@ -167,11 +167,7 @@ class ArrayMultiAdapterTest extends TestCase {
             $privateFileExists  = file_exists(self::PATH . '/' . $privateEnvKeyFile);
             $this->assertTrue($privateFileExists);
             if ($privateFileExists) {
-                $repository         = RepositoryBuilder::createWithNoAdapters()
-                    ->addAdapter(ArrayAdapter::class)
-                    ->make();
-                $dotenv             = Dotenv::create($repository, self::PATH, $privateEnvKeyFile);
-                $privateData        = $dotenv->load();
+                $privateData        = Dotenvx::createArrayBacked(self::PATH, $privateEnvKeyFile)->load();
                 $containsPrivateKey = isset($privateData['DOTENV_PRIVATE_KEY']);
                 $this->assertTrue($containsPrivateKey);
                 if ($containsPrivateKey) {
@@ -251,7 +247,7 @@ class ArrayMultiAdapterTest extends TestCase {
             $repository         = RepositoryBuilder::createWithNoAdapters()
                 ->addAdapter($arrayAdapter)
                 ->make();
-            Dotenv::create($repository, self::PATH, $envFile)->load();
+            Dotenvx::create($repository, self::PATH, $envFile)->load();
             $options            = $arrayAdapter->values;
             $assert->assertEquals('Ek1Krd8QRcG2B20p1iwM6IHgUVGHyCcudqjqoAgqMQA='                                          , $options['DOTENV_PUBLIC_KEY']);
             $assert->assertEquals('pdo_mysql'                                                                             , $options['DB']['DRIVER']);
