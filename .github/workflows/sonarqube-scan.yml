@@ -1,0 +1,37 @@
+name: Scan with SonarQube
+
+on: [push]
+
+# Cancels all previous workflow runs for the same branch that have not yet completed.
+concurrency:
+  # The concurrency group contains the workflow name and the branch name.
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sonarqube:
+    name: SonarQube
+    runs-on: "${{ matrix.operating-system }}"
+
+    strategy:
+      matrix:
+        operating-system:
+          - "ubuntu-latest"
+          - "windows-latest"
+
+    steps:
+      - name: "Configure Git (for Windows)"
+        if: ${{ matrix.operating-system == 'windows-latest' }}
+        run: |
+          git config --system core.autocrlf false
+          git config --system core.eol lf
+
+      - name: "Checkout repository"
+        uses: "actions/checkout@v5"
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+
+      - name: "SonarQube Scan"
+        uses: SonarSource/sonarqube-scan-action@v6
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
