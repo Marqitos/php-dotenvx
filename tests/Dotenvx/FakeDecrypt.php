@@ -1,11 +1,11 @@
 <?php
 /**
- * This file is part of the Rodas\Doventx library
+ * This file is part of the Rodas\Dotenvx library
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * @package Rodas\Doventx
+ * @package Rodas\Dotenvx
  * @subpackage Test
  * @copyright 2025 Marcos Porto <php@marcospor.to>
  * @license https://opensource.org/license/bsd-3-clause BSD-3-Clause
@@ -29,7 +29,7 @@ class FakeDecrypt {
         ]
     ];
 
-    public static function decrypt(string $publicKey, $encryptedValues) {
+    public static function decrypt(string $publicKey, array $encryptedValues) {
         $decryptedValues = [];
         foreach ($encryptedValues as $encryptedValue) {
             if (isset(self::$data[$publicKey][$encryptedValue])) {

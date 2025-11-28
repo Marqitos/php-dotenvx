@@ -2,6 +2,9 @@
 /**
  * This file is part of the Rodas\Dotenvx library
  *
+ * Based on Dotenv\Dotenv.php
+ * vlucas/phpdotenv from Vance Lucas and Graham Campbell.
+ *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *

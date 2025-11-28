@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is part of the Rodas\Doventx library
+ * This file is part of the Rodas\Dotenvx library
  *
  * Based on Dotenv\Repository\Adapter\ArrayAdapter.php
  * vlucas/phpdotenv from Vance Lucas and Graham Campbell.
@@ -8,7 +8,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * @package Rodas\Doventx
+ * @package Rodas\Dotenvx
  * @copyright 2025 Marcos Porto <php@marcospor.to>
  * @license https://opensource.org/license/bsd-3-clause BSD-3-Clause
  * @link https://marcospor.to/repositories/dotenvx
