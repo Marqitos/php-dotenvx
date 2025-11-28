@@ -39,7 +39,7 @@ $arrayAdapter       = new ArrayAdapter();
 $repository         = RepositoryBuilder::createWithNoAdapters()
     ->addAdapter($arrayAdapter)
     ->make();
-Dotenv::create($repository, __DIR__, '.env')->load();
+Dotenv::create($repository, __DIR__)->load();
 
 // Is encrypted?
 $publicKey          = $arrayAdapter->isEncrypted();

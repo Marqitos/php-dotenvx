@@ -1,11 +1,11 @@
 <?php
 /**
- * This file is part of the Rodas\Doventx library
+ * This file is part of the Rodas\Dotenvx library
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * @package Rodas\Doventx
+ * @package Rodas\Dotenvx
  * @subpackage Test
  * @copyright 2025 Marcos Porto <php@marcospor.to>
  * @license https://opensource.org/license/bsd-3-clause BSD-3-Clause
@@ -201,15 +201,14 @@ class ArrayAdapterTest extends TestCase {
     }
 
     public static function loadFile(Assert $assert): ArrayAdapter {
-        $envFile            = '.env';
-        $envFileExists      = file_exists(self::PATH . '/' . $envFile);
+        $envFileExists      = file_exists(self::PATH . '/.env');
         $arrayAdapter       = new ArrayAdapter();
         $assert->assertTrue($envFileExists);
         if ($envFileExists) {
             $repository         = RepositoryBuilder::createWithNoAdapters()
                 ->addAdapter($arrayAdapter)
                 ->make();
-            Dotenv::create($repository, self::PATH, $envFile)->load();
+            Dotenv::create($repository, self::PATH)->load();
             $options            = $arrayAdapter->values;
             $assert->assertEquals('Ek1Krd8QRcG2B20p1iwM6IHgUVGHyCcudqjqoAgqMQA='                                          , $options['DOTENV_PUBLIC_KEY']);
             $assert->assertEquals('pdo_mysql'                                                                             , $options['DB_DRIVER']);
