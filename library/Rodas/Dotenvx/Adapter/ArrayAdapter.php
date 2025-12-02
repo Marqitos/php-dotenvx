@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is part of the Rodas\Doventx library
+ * This file is part of the Rodas\Dotenvx library
  *
  * Based on Dotenv\Repository\Adapter\ArrayAdapter.php
  * vlucas/phpdotenv from Vance Lucas and Graham Campbell.
@@ -8,7 +8,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * @package Rodas\Doventx
+ * @package Rodas\Dotenvx
  * @copyright 2025 Marcos Porto <php@marcospor.to>
  * @license https://opensource.org/license/bsd-3-clause BSD-3-Clause
  * @link https://marcospor.to/repositories/dotenvx
@@ -25,9 +25,16 @@ use Rodas\Dotenvx\Decryptor;
 use Rodas\Dotenvx\Provider\KeyProviderInterface;
 use SensitiveParameter;
 
+use function array_unique;
+use function is_string;
+use function substr;
+
 require_once 'Dotenv/Repository/Adapter/AdapterInterface.php';
 require_once __DIR__ . '/DecryptableAdapterInterface.php';
 
+/**
+ * Read or write de values on a array, and with the ability to decrypt its contents
+ */
 class ArrayAdapter implements AdapterInterface, DecryptableAdapterInterface {
 # Fields
     /**
@@ -133,6 +140,24 @@ class ArrayAdapter implements AdapterInterface, DecryptableAdapterInterface {
     }
 
     /**
+     * Return all encrypted values as base64 encoded strings
+     *
+     * @return array<string>
+     */
+    public function getEncryptedValues(): array {
+        $encryptedValues = [];
+        // Find encrypted values
+        foreach ($this->variables as $value) {
+            if (is_string($value) &&
+                substr($value, 0, 10) == 'encrypted:') {
+
+                $encryptedValues[] = substr($value, 10);
+            }
+        }
+        return array_unique($encryptedValues);
+    }
+
+    /**
      * Return if the adapter contains encrypted values, and there is a public key
      *
      * @param  ?string              $publicKey (Optional) The public key used for encryption.
@@ -173,5 +198,28 @@ class ArrayAdapter implements AdapterInterface, DecryptableAdapterInterface {
         }
     }
 
+    /**
+     * Replace encrypted values with decrypted values
+     *
+     * @param  array<string, mixed> $values Decrypted values, encrypted values as keys.
+     * @return bool                         Still contains encrypted values after replacement.
+     */
+    public function replaceEncryptedValues(#[SensitiveParameter] array $decryptedValues): bool {
+        $hasEncryptedValues = false;
+        // Find encrypted values
+        foreach ($this->variables as $key => $value) {
+            if (is_string($value) &&
+                substr($value, 0, 10) == 'encrypted:') {
+
+                $encrypted = substr($value, 10);
+                if (isset($decryptedValues[$encrypted])) {
+                    $this->write($key, $decryptedValues[$encrypted]);
+                } else {
+                    $hasEncryptedValues = true;
+                }
+            }
+        }
+        return $hasEncryptedValues;
+    }
 # -- Members of Dotenv\Repository\Adapter\DecryptableAdapterInterface
 }
