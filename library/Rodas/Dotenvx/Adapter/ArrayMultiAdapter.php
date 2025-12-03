@@ -1,11 +1,11 @@
 <?php
 /**
- * This file is part of the Rodas\Doventx library
+ * This file is part of the Rodas\Dotenvx library
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * @package Rodas\Doventx
+ * @package Rodas\Dotenvx
  * @copyright 2025 Marcos Porto <php@marcospor.to>
  * @license https://opensource.org/license/bsd-3-clause BSD-3-Clause
  * @link https://marcospor.to/repositories/dotenvx
@@ -19,17 +19,21 @@ use Dotenv\Repository\Adapter\AdapterInterface;
 use PhpOption\{ None, Option, Some};
 use Rodas\Dotenvx\Decryptor;
 use Rodas\Dotenvx\Provider\KeyProviderInterface;
+use RuntimeException;
 use SensitiveParameter;
 
 use function array_merge;
+use function array_unique;
 use function count;
 use function explode;
+use function is_string;
+use function substr;
 
 require_once 'Dotenv/Repository/Adapter/AdapterInterface.php';
 require_once __DIR__ . '/DecryptableAdapterInterface.php';
 
 /**
- * Read or write de values on a multilevel array
+ * Read or write de values on a multilevel array, and with the ability to decrypt its contents
  */
 class ArrayMultiAdapter implements AdapterInterface, DecryptableAdapterInterface {
 # Fields
@@ -40,7 +44,7 @@ class ArrayMultiAdapter implements AdapterInterface, DecryptableAdapterInterface
      */
     private array $variables;
     /**
-     * Key to array level separator, for use with self::create()
+     * Char to split the name into keys, for use with self::create()
      *
      * @var string
      */
@@ -49,7 +53,7 @@ class ArrayMultiAdapter implements AdapterInterface, DecryptableAdapterInterface
 
 # Properties
     /**
-     * Char to split the name into keys
+     * Get the char to split the name into keys
      *
      * @var string
      */
@@ -64,9 +68,9 @@ class ArrayMultiAdapter implements AdapterInterface, DecryptableAdapterInterface
 
 # Constructor
     /**
-     * Create a new array adapter instance.
+     * Create a new array multi-level adapter instance.
      *
-     * @param string $separator Key to array level separator
+     * @param string $separator Char to split the name into keys
      */
     public function __construct(string $separator) {
         $this->variables = [];
@@ -211,6 +215,26 @@ class ArrayMultiAdapter implements AdapterInterface, DecryptableAdapterInterface
     }
 
     /**
+     * Return all encrypted values as base64 encoded strings
+     *
+     * @return array<string>
+     */
+    public function getEncryptedValues(): array {
+        $encryptedValues = [];
+        // Find encrypted values
+        foreach ($this->variables as $key => $value) {
+            if (is_string($value) &&
+                substr($value, 0, 10) == 'encrypted:') {
+
+                $encryptedValues[] = substr($value, 10);
+            } elseif (is_array($value)) {
+                $encryptedValues  = array_merge($encryptedValues, $this->getEncryptedValuesLevel([$key]));
+            }
+        }
+        return array_unique($encryptedValues);
+    }
+
+    /**
      * Return if the adapter contains encrypted values, and there is a public key
      *
      * @param  ?string              $publicKey (Optional) The public key used for encryption.
@@ -252,17 +276,68 @@ class ArrayMultiAdapter implements AdapterInterface, DecryptableAdapterInterface
             return false;
         }
     }
+
+    /**
+     * Replace encrypted values with decrypted values
+     *
+     * @param  array<string, mixed> $values Decrypted values, encrypted values as keys.
+     * @return bool                         Still contains encrypted values after replacement.
+     */
+    public function replaceEncryptedValues(#[SensitiveParameter] array $decryptedValues): bool {
+        $hasEncryptedValues = false;
+        // Find encrypted values
+        foreach ($this->variables as $key => $value) {
+            if (is_string($value) &&
+                substr($value, 0, 10) == 'encrypted:') {
+
+                $encrypted = substr($value, 10);
+                if (isset($decryptedValues[$encrypted])) {
+                    $this->write($key, $decryptedValues[$encrypted]);
+                } else {
+                    $hasEncryptedValues = true;
+                }
+            } elseif (is_array($value)) {
+                $hasEncryptedValues = $hasEncryptedValues || $this->replaceEncryptedValuesLevel($decryptedValues, [$key]);
+            }
+        }
+        return $hasEncryptedValues;
+    }
 # -- Members of Dotenv\Repository\Adapter\DecryptableAdapterInterface
 
 # Methods
     /**
      * Return a key name from a multilevel xpath
      *
-     * @param  array $names
+     * @param  array<string> $names
      * @return string
      */
     public function getKey(array $names): string {
         return implode($this->separator, $names);
+    }
+
+    /**
+     * Return all encrypted values as base64 encoded strings of the selected an children levels.
+     *
+     * @param array<string>  $xPath The path to the values to decrypt within the ArrayMultiAdapter instance.
+     * @return array<string>        All encrypted values as base64 encoded strings of the selected an children levels.
+     */
+    public function getEncryptedValuesLevel(array $xPath = []): array {
+        $encryptedValues = [];
+        $values     = $this->variables;
+        foreach ($xPath as $part) {
+            $values = $values[$part];
+        }
+        // Find encrypted values
+        foreach ($values as $key => $value) {
+            if (is_string($value) &&
+                substr($value, 0, 10) == 'encrypted:') {
+
+                $encryptedValues[]  = substr($value, 10);
+            } elseif (is_array($value)) {
+                $encryptedValues    = array_merge($encryptedValues, $this->getEncryptedValuesLevel(array_merge($xPath, [$key])));
+            }
+        }
+        return $encryptedValues;
     }
 
     /**
@@ -309,11 +384,43 @@ class ArrayMultiAdapter implements AdapterInterface, DecryptableAdapterInterface
                 break;
             }
             if (is_string($value) &&
-                      substr($value, 0, 10) == 'encrypted:') {
+                substr($value, 0, 10) == 'encrypted:') {
+
                 $hasEncryptedValues = true;
                 break;
             } elseif (is_array($value)) {
                 $hasEncryptedValues = $this->isEncryptedLevel(array_merge($xPath, [$key]));
+            }
+        }
+        return $hasEncryptedValues;
+    }
+
+    /**
+     * Replace encrypted values with decrypted values of the selected an children levels.
+     *
+     * @param  array<string, mixed> $values Decrypted values, encrypted values as keys.
+     * @return bool                         Still contains encrypted values after replacement.
+     */
+    public function replaceEncryptedValuesLevel(#[SensitiveParameter] array $decryptedValues, array $xPath = []): bool {
+        $hasEncryptedValues = false;
+        $values     = $this->variables;
+        foreach ($xPath as $part) {
+            $values = $values[$part];
+        }
+        // Find encrypted values
+        foreach ($values as $key => $value) {
+            if (is_string($value) &&
+                substr($value, 0, 10) == 'encrypted:') {
+
+                $encrypted = substr($value, 10);
+                if (isset($decryptedValues[$encrypted])) {
+                    $name = $this->getKey(array_merge($xPath, [$key]));
+                    $this->write($name, $decryptedValues[$encrypted]);
+                } else {
+                    $hasEncryptedValues = true;
+                }
+            } elseif (is_array($value)) {
+                $hasEncryptedValues = $hasEncryptedValues || $this->replaceEncryptedValuesLevel($decryptedValues, array_merge($xPath, [$key]));
             }
         }
         return $hasEncryptedValues;

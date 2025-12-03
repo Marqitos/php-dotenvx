@@ -9,6 +9,8 @@ use Dotenv\Util\Regex;
 use GrahamCampbell\ResultType\Result;
 use GrahamCampbell\ResultType\Success;
 
+require_once __DIR__ . '/ParserInterface.php';
+
 final class Parser implements ParserInterface
 {
     /**

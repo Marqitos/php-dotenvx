@@ -29,7 +29,7 @@ class FakeDecrypt {
         ]
     ];
 
-    public static function decrypt(string $publicKey, array $encryptedValues) {
+    public static function decrypt(string $publicKey, array $encryptedValues): array {
         $decryptedValues = [];
         foreach ($encryptedValues as $encryptedValue) {
             if (isset(self::$data[$publicKey][$encryptedValue])) {

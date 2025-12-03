@@ -19,7 +19,6 @@ namespace Rodas\Test\Dotenvx\Adapter;
 use Dotenv\Repository\RepositoryBuilder;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
-use Rodas\Dotenvx\Adapter\ArrayAdapter;
 use Rodas\Dotenvx\Adapter\ArrayMultiAdapter;
 use Rodas\Dotenvx\Dotenvx;
 use Rodas\Dotenvx\Provider\StaticKeyProvider;
@@ -144,7 +143,6 @@ class ArrayMultiAdapterTest extends TestCase {
     /**
      * Test ArrayMultiAdapter::decrypt
      *
-     * @covers Rodas\Dotenvx\Adapter\ArrayAdapter
      * @covers Rodas\Dotenvx\Adapter\ArrayMultiAdapter->decrypt
      * @covers Rodas\Dotenvx\Adapter\ArrayMultiAdapter->isEncrypted
      * @covers Rodas\Dotenvx\Provider\StaticKeyProvider

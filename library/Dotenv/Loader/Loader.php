@@ -8,6 +8,7 @@ use Dotenv\Parser\Entry;
 use Dotenv\Parser\Value;
 use Dotenv\Repository\RepositoryInterface;
 
+require_once __DIR__ . '/LoaderInterface.php';
 require_once __DIR__ . '/../Repository/RepositoryInterface.php';
 
 final class Loader implements LoaderInterface
