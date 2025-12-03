@@ -12,13 +12,22 @@ Same cryptography as Bitcoin
 
 ```mermaid
 classDiagram
-    note for Decryptor "Rodas\Dotenvx namespace"
-    class Decryptor{
-        ::createKeyPair()
-        ::cryptoBase64Encode()
-        ::cryptoBase64Decode()
-        ::decrypt()
-        ::encrypt()
+    Decryptor ..> KeyProviderInterface
+    namespace `Rodas\Dotenvx` {
+        class Decryptor {
+            + createKeyPair() array
+            + cryptoBase64Encode(string) string
+            + cryptoBase64Decode(string) string
+            + decrypt(encryptedValue, keyProvider) string
+            + encrypt(value, publicKey) string
+        }
+    }
+    namespace `Rodas\Dotenvx\Provider` {
+        class KeyProviderInterface{
+            <<Interface>>
+            + string publicKey
+            + string privateKey
+        }
     }
 ```
 

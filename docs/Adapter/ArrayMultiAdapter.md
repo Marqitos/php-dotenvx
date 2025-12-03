@@ -7,36 +7,42 @@ and with the ability to decrypt its contents
 
 ```mermaid
 classDiagram
-    note for ArrayMultiAdapter "Rodas\Dotenvx\Adapter namespace"
-    note for AdapterInterface "Dotenv\Repository\Adapter namespace"
     ArrayMultiAdapter <|-- DecryptableAdapterInterface
     ArrayMultiAdapter <|-- AdapterInterface
     AdapterInterface <|-- ReaderInterface
     AdapterInterface <|-- WriterInterface
-    class ArrayMultiAdapter{
-        string ::defaultSeparator
-        string separator
-        ::__construct()
-        ->getKey()
-        ->getEncryptedValuesLevel()
-        ->isEncryptedLevel()
+    namespace `Rodas\Dotenvx\Adapter` {
+        class ArrayMultiAdapter{
+            + string ::defaultSeparator
+            + string separator
+            + __construct(separator)
+            + getKey(names) string
+            + getEncryptedValuesLevel(xPath) array
+            + isEncryptedLevel(xPath) bool
+        }
+        class DecryptableAdapterInterface {
+            <<Interface>>
+            + array values
+            + decrypt(keyProvider)
+            + getEncryptedValues() array
+            + isEncrypted(publicKey) string|false
+            + replaceEncryptedValues(decryptedValues) bool
+        }
     }
-    class DecryptableAdapterInterface{
-        array values
-        ->decrypt()
-        ->getEncryptedValues()
-        ->isEncrypted()
-        ->replaceEncryptedValues()
-    }
-    class AdapterInterface{
-        ->create()
-    }
-    class ReaderInterface {
-        ->read()
-    }
-    class WriterInterface {
-        ->delete()
-        ->write()
+    namespace `Dotenv\Repository\Adapter` {
+        class AdapterInterface{
+            <<Interface>>
+            + ::create()
+        }
+        class ReaderInterface {
+            <<Interface>>
+            + read(name) Option
+        }
+        class WriterInterface {
+            <<Interface>>
+            + delete(name) bool
+            + write(name, value) bool
+        }
     }
 ```
 

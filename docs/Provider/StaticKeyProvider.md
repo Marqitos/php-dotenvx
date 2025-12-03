@@ -6,14 +6,16 @@ Represents an adapter that can contain encrypted values
 
 ```mermaid
 classDiagram
-    note for StaticKeyProvider "Rodas\Dotenvx\Provider namespace"
     StaticKeyProvider <|-- KeyProviderInterface
-    class StaticKeyProvider{
-        ::__construct
-    }
-    class KeyProviderInterface{
-        string publicKey
-        string privateKey
+    namespace `Rodas\Dotenvx\Provider` {
+        class StaticKeyProvider{
+            + __construct(publicKey, privateKey)
+        }
+        class KeyProviderInterface{
+            <<Interface>>
+            + string publicKey
+            + string privateKey
+        }
     }
 ```
 

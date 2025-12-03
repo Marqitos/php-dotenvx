@@ -6,13 +6,23 @@ Represents an adapter that can contain encrypted values
 
 ```mermaid
 classDiagram
-    note for DecryptableAdapterInterface "Rodas\Dotenvx\Adapter namespace"
-    class DecryptableAdapterInterface{
-        array values
-        ->decrypt()
-        ->getEncryptedValues()
-        ->isEncrypted()
-        ->replaceEncryptedValues()
+    DecryptableAdapterInterface ..> KeyProviderInterface
+    namespace `Rodas\Dotenvx\Adapter` {
+        class DecryptableAdapterInterface {
+            <<Interface>>
+            + array values
+            + decrypt(keyProvider)
+            + getEncryptedValues() array
+            + isEncrypted(publicKey) string|false
+            + replaceEncryptedValues(decryptedValues) bool
+        }
+    }
+    namespace `Rodas\Dotenvx\Provider` {
+        class KeyProviderInterface{
+            <<Interface>>
+            + string publicKey
+            + string privateKey
+        }
     }
 ```
 
@@ -20,7 +30,7 @@ classDiagram
 
 ### values
 
-Gets de stored values
+Gets the stored values
 
 ```php
 array $values { get; }

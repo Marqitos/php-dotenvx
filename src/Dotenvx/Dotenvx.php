@@ -28,6 +28,7 @@ use Dotenv\Repository\RepositoryInterface;
 use Dotenv\Store\StoreBuilder;
 use Dotenv\Store\StoreInterface;
 use Dotenv\Store\StringStore;
+use Dotenv\Validator;
 use Rodas\Dotenvx\Adapter\ArrayAdapter;
 use Rodas\Dotenvx\Parser\EntriesExtensions;
 

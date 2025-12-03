@@ -7,29 +7,35 @@ and with the ability to decrypt its contents
 
 ```mermaid
 classDiagram
-    note for ArrayAdapter "Rodas\Dotenvx\Adapter namespace"
-    note for AdapterInterface "Dotenv\Repository\Adapter namespace"
     ArrayAdapter <|-- DecryptableAdapterInterface
     ArrayAdapter <|-- AdapterInterface
     AdapterInterface <|-- ReaderInterface
     AdapterInterface <|-- WriterInterface
-    class ArrayAdapter{ }
-    class DecryptableAdapterInterface{
-        array values
-        ->decrypt()
-        ->getEncryptedValues()
-        ->isEncrypted()
-        ->replaceEncryptedValues()
+    namespace `Rodas\Dotenvx\Adapter` {
+        class ArrayAdapter{ }
+        class DecryptableAdapterInterface {
+            <<Interface>>
+            + array values
+            + decrypt(keyProvider)
+            + getEncryptedValues() array
+            + isEncrypted(publicKey) string|false
+            + replaceEncryptedValues(decryptedValues) bool
+        }
     }
-    class AdapterInterface{
-        ->create()
-    }
-    class ReaderInterface {
-        ->read()
-    }
-    class WriterInterface {
-        ->delete()
-        ->write()
+    namespace `Dotenv\Repository\Adapter` {
+        class AdapterInterface{
+            <<Interface>>
+            + ::create()
+        }
+        class ReaderInterface {
+            <<Interface>>
+            + read(name) Option
+        }
+        class WriterInterface {
+            <<Interface>>
+            + delete(name) bool
+            + write(name, value) bool
+        }
     }
 ```
 

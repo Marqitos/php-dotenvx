@@ -6,10 +6,12 @@ Represents an adapter that can contain encrypted values
 
 ```mermaid
 classDiagram
-    note for KeyProviderInterface "Rodas\Dotenvx\Provider namespace"
-    class KeyProviderInterface{
-        string publicKey
-        string privateKey
+    namespace `Rodas\Dotenvx\Provider` {
+        class KeyProviderInterface{
+            <<Interface>>
+            + string publicKey
+            + string privateKey
+        }
     }
 ```
 
