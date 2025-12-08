@@ -3,6 +3,23 @@
 Plaintext `.env` files have been a major attack vector,
 but they've also been undeniably useful.
 
+[A secure dotenv (dotenvx.com)](https://dotenvx.com/)
+
+> "Dotenvx: Reducing Secrets Risk with Cryptographic Separation
+>
+> Abstract. An ideal secrets solution would not only centralize secrets but also
+> contain the fallout of a breach.
+> While secrets managers offer centralized storage and distribution,
+> their design creates a large blast radius,
+> risking exposure of thousands or even millions of secrets.
+> We propose a solution that reduces the blast radius by splitting secrets
+> management into two distinct components:
+> an encrypted secrets file and a separate decryption key.
+>
+> ..."
+>
+> [Read the whitepaper](https://github.com/Marqitos/php-dotenvx/blob/main/docs/dotenvx.pdf)
+
 Dotenvx decrypts your `.env` files.
 Using with cryptographic separation limiting their attack vector while
 retaining their benefits.
@@ -26,6 +43,21 @@ environment.
 
 This library also provides an adapter to dump the `.env` values ​​into
 an array and a multi-level array.
+
+## How to use
+
+See [the documentation](https://github.com/Marqitos/php-dotenvx/blob/main/docs/quickstart.md).
+
+---
+
+Under the hood,
+this is all implemented using the same public-key cryptography as [Bitcoin](https://en.bitcoin.it/wiki/Secp256k1).
+
+---
+
+📦 Available at Packagist: [rodas/dotenvx](https://packagist.org/packages/rodas/dotenvx)
+
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Marqitos/php-dotenvx)
 
 ---
 
