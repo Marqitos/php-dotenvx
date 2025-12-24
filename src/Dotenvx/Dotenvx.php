@@ -30,10 +30,8 @@ use Dotenv\Store\StoreInterface;
 use Dotenv\Store\StringStore;
 use Dotenv\Validator;
 use Rodas\Dotenvx\Adapter\ArrayAdapter;
-use Rodas\Dotenvx\Parser\EntriesExtensions;
-
-use function call_user_func;
-use function is_string;
+use Rodas\Dotenvx\Middleware\MiddlewareInterface;
+use Throwable;
 
 class Dotenvx {
 
@@ -64,6 +62,13 @@ class Dotenvx {
      * @var \Dotenv\Repository\RepositoryInterface
      */
     protected $repository;
+
+    /**
+     * The middlewares.
+     *
+     * @var Middleware\MiddlewareInterface[]
+     */
+    protected $middlewares = [];
 
     /**
      * Create a new dotenvx instance.
@@ -183,6 +188,17 @@ class Dotenvx {
     }
 
     /**
+     * Adds a Middleware
+     *
+     * @param  MiddlewareInterface $middleware
+     * @return static
+     */
+    public function addMiddleware(MiddlewareInterface $middleware): static {
+        $this->middlewares[] = $middleware;
+        return $this;
+    }
+
+    /**
      * Read and load environment file(s).
      *
      * @throws \Dotenv\Exception\InvalidPathException|\Dotenv\Exception\InvalidEncodingException|\Dotenv\Exception\InvalidFileException
@@ -192,23 +208,12 @@ class Dotenvx {
     public function load(): array {
         $entries = $this->parser->parse($this->store->read());
 
-        return $this->loader->load($this->repository, $entries);
-    }
-
-    /**
-     * Read, decrypt and load environment file(s).
-     *
-     * @param  callable $decryptor Callable with the signature `function(string $publicKey, array $encryptedValues): array`
-     * @return array<string, string|null>
-     */
-    public function loadEncrypted(callable $decryptor): array {
-        $entries = $this->parser->parse($this->store->read());
-        $publicKey = EntriesExtensions::isEncrypted($entries);
-
-        if (is_string($publicKey)) {
-            $encryptedValues    = EntriesExtensions::getEncryptedValues($entries);
-            $decryptedValues    = call_user_func($decryptor, $publicKey, $encryptedValues);
-            $entries            = EntriesExtensions::replaceEncryptedValues($entries, $decryptedValues);
+        foreach ($this->middlewares as $middleware) {
+            try {
+                $entries = $middleware->process($entries);
+            } catch (Throwable $e) {
+                // Ignore middleware errors
+            }
         }
 
         return $this->loader->load($this->repository, $entries);
@@ -231,30 +236,13 @@ class Dotenvx {
     }
 
     /**
-     * Read, decrypt and load environment file(s), silently failing if no files can be read.
-     *
-     * @param  callable $decryptor Callable with the signature `function(string $publicKey, array $encryptedValues): array`
-     * @throws \Dotenv\Exception\InvalidEncodingException|\Dotenv\Exception\InvalidFileException
-     *
-     * @return array<string, string|null>
-     */
-    public function safeLoadEncrypted(callable $decryptor): array {
-        try {
-            return $this->loadEncrypted($decryptor);
-        } catch (InvalidPathException $e) {
-            // suppressing exception
-            return [];
-        }
-    }
-
-    /**
      * Required ensures that the specified variables exist, and returns a new validator object.
      *
      * @param string|string[] $variables
      *
      * @return \Dotenv\Validator
      */
-    public function required($variables) {
+    public function required(string|array $variables) {
         return (new Validator($this->repository, (array) $variables))->required();
     }
 
@@ -265,7 +253,7 @@ class Dotenvx {
      *
      * @return \Dotenv\Validator
      */
-    public function ifPresent($variables) {
+    public function ifPresent(string|array $variables): Validator {
         return new Validator($this->repository, (array) $variables);
     }
 }

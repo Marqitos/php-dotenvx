@@ -13,17 +13,51 @@
 
 declare(strict_types=1);
 
-namespace Rodas\Dotenvx\Parser;
+namespace Rodas\Dotenvx\Middleware;
 
 use Dotenv\Parser\Entry;
 use Dotenv\Parser\Value;
 use PhpOption\Option;
 use SensitiveParameter;
 
-class EntriesExtensions {
-    private function __construct() {
-        // Is a Singleton class
+use function array_unique;
+use function call_user_func;
+use function is_string;
+use function substr;
+
+class DecryptorMiddleware implements MiddlewareInterface {
+
+    protected $decryptor;
+
+    /**
+     * Create a new instance of DecryptorMiddleware
+     *
+     * @param  callable(string, array):array $callback Callable with the signature `function(string $publicKey, array $encryptedValues): array`
+     */
+    public function __construct(callable $callback) {
+        $this->decryptor = $callback;
     }
+
+# MiddlewareInterface Members
+    /**
+     * Process all entries
+     *
+     * @param Entry[] $entries The entries to process
+     *
+     * @return Entry[] The processed entries
+     */
+    public function process(array $entries): array {
+        $publicKey = self::isEncrypted($entries);
+
+        if (is_string($publicKey)) {
+            $encryptedValues    = self::getEncryptedValues($entries);
+            $decryptedValues    = call_user_func($this->decryptor, $publicKey, $encryptedValues);
+            $entries            = self::replaceEncryptedValues($entries, $decryptedValues);
+        }
+
+        return $entries;
+    }
+# -- MiddlewareInterface Members
 
     /**
      * Return all encrypted values as base64 encoded strings
@@ -113,7 +147,7 @@ class EntriesExtensions {
 
                     $encrypted = substr($chars, 10);
                     if (isset($decryptedValues[$encrypted])) {
-                        
+
                         //$vars   = $value->getVars();
                         $value  = Value::blank()->append($decryptedValues[$encrypted], false);
                         $result[] = new Entry(
