@@ -17,6 +17,7 @@ declare(strict_types=1);
 namespace Rodas\Test\Dotenvx;
 
 use Dotenv\Exception\InvalidEncodingException;
+use Dotenv\Exception\InvalidPathException;
 use Rodas\Dotenvx\Dotenvx;
 
 use function getenv;
@@ -29,17 +30,32 @@ use function strlen;
  */
 class DotenvxTest extends Data {
 
-    const DEFAULT = [
-        'DOTENV_PUBLIC_KEY' => 'Ek1Krd8QRcG2B20p1iwM6IHgUVGHyCcudqjqoAgqMQA=',
-        'DB_DRIVER' => 'pdo_mysql',
-        'DB_HOST' => 'localhost',
-        'DB_PORT' => '3306',
-        'DB_USER' => 'username',
-        'DB_PASSWORD' => 'pa$$w0rd',
-        'DB_CHARSET' => 'utf8mb4',
-        'SPACED' => 'with spaces',
-        'NULL' => '',
-    ];
+    public function testDotenvThrowsExceptionIfUnableToLoadFile() {
+        $dotenv = Dotenvx::createMutable(__DIR__);
+
+        $this->expectException(InvalidPathException::class);
+        $this->expectExceptionMessage('Unable to read any of the environment file(s) at');
+
+        $dotenv->load();
+    }
+
+    public function testDotenvThrowsExceptionIfUnableToLoadFiles() {
+        $dotenv = Dotenvx::createMutable([__DIR__, __DIR__.'/foo/bar']);
+
+        $this->expectException(InvalidPathException::class);
+        $this->expectExceptionMessage('Unable to read any of the environment file(s) at');
+
+        $dotenv->load();
+    }
+
+    public function testDotenvThrowsExceptionWhenNoFiles() {
+        $dotenv = Dotenvx::createMutable([]);
+
+        $this->expectException(InvalidPathException::class);
+        $this->expectExceptionMessage('At least one environment file path must be provided.');
+
+        $dotenv->load();
+    }
 
     public function testDotenvSkipsLoadingIfFileIsMissing() {
         $dotenv = Dotenvx::createMutable(__DIR__);

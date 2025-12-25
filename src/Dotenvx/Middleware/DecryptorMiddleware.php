@@ -22,7 +22,9 @@ use SensitiveParameter;
 
 use function array_unique;
 use function call_user_func;
+use function in_array;
 use function is_string;
+use function str_split;
 use function substr;
 
 class DecryptorMiddleware implements MiddlewareInterface {
@@ -148,8 +150,10 @@ class DecryptorMiddleware implements MiddlewareInterface {
                     $encrypted = substr($chars, 10);
                     if (isset($decryptedValues[$encrypted])) {
 
-                        //$vars   = $value->getVars();
-                        $value  = Value::blank()->append($decryptedValues[$encrypted], false);
+                        $value = Value::blank();
+                        foreach (str_split($decryptedValues[$encrypted]) as $token) {
+                            $value = $value->append($token, $token === '$');
+                        }
                         $result[] = new Entry(
                             $entry->getName(),
                             $value

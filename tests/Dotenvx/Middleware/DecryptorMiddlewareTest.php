@@ -16,7 +16,6 @@ declare(strict_types=1);
 
 namespace Rodas\Test\Dotenvx\Middleware;
 
-use Dotenv\Exception\InvalidPathException;
 use Dotenv\Loader\Loader;
 use Dotenv\Parser\Parser;
 use Dotenv\Repository\RepositoryBuilder;
@@ -28,19 +27,32 @@ use Rodas\Dotenvx\Middleware\DecryptorMiddleware;
 use Rodas\Test\Dotenvx\Data;
 use Rodas\Test\Dotenvx\FakeDecrypt;
 
+use function array_flip;
+use function array_intersect_key;
+use function file_exists;
+use function in_array;
+
 class DecryptorMiddlewareTest extends Data {
-    // TODO: Partial of data
-    const DEFAULT = [
-        'DOTENV_PUBLIC_KEY' => 'Ek1Krd8QRcG2B20p1iwM6IHgUVGHyCcudqjqoAgqMQA=',
-        'DB_DRIVER' => 'pdo_mysql',
-        'DB_HOST' => 'localhost',
-        'DB_PORT' => '3306',
-        'DB_USER' => 'username',
-        'DB_PASSWORD' => 'pa$$w0rd',
-        'DB_CHARSET' => 'utf8mb4',
-        'SPACED' => 'with spaces',
-        'NULL' => '',
-    ];
+
+    protected array $default {
+        get {
+            if (!isset($this->default)) {
+
+                $flip = array_flip([
+                    'DOTENV_PUBLIC_KEY',
+                    'DB_DRIVER',
+                    'DB_HOST',
+                    'DB_PORT',
+                    'DB_USER',
+                    'DB_PASSWORD',
+                    'DB_CHARSET',
+                    'SPACED',
+                    'NULL']);
+                $this->default = array_intersect_key($this->data, $flip);
+            }
+            return $this->default;
+        }
+    }
 
     /**
      * Test Dotenvx::load with DecryptorMiddleware and ArrayAdapter
@@ -50,10 +62,8 @@ class DecryptorMiddlewareTest extends Data {
      * @covers Rodas\Dotenvx\Middleware\DecryptorMiddleware
      */
     public function testLoadEncrypted() {
-        $envFileExists      = file_exists($this->path . '/.env');
+        $this->assertTrue(file_exists($this->path . '/.env'));
         $arrayAdapter       = new ArrayAdapter();
-        $this->assertTrue($envFileExists);
-        if ($envFileExists) {
             $repository         = RepositoryBuilder::createWithNoAdapters()
                 ->addAdapter($arrayAdapter)
                 ->make();
@@ -64,13 +74,9 @@ class DecryptorMiddlewareTest extends Data {
 
             // Validate values
             $options            = $arrayAdapter->values;
-            $this->assertEquals('pdo_mysql' , $options['DB_DRIVER']);
-            $this->assertEquals('localhost' , $options['DB_HOST']);
-            $this->assertEquals('3306'      , $options['DB_PORT']);
-            $this->assertEquals('username'  , $options['DB_USER']);
-            $this->assertEquals('pa$$w0rd'  , $options['DB_PASSWORD']);
-            $this->assertEquals('utf8mb4'   , $options['DB_CHARSET']);
-        }
+            foreach(['DB_DRIVER', 'DB_HOST', 'DB_PORT', 'DB_USER', 'DB_PASSWORD', 'DB_CHARSET'] as $key) {
+                $this->assertEquals($this->data[$key], $options[$key]);
+            }
     }
 
     /**
@@ -82,61 +88,25 @@ class DecryptorMiddlewareTest extends Data {
      */
     public function testLoadEncryptedMulti() {
         $envFile            = 'multilevel.env';
-        $envFileExists      = file_exists($this->path . '/' . $envFile);
+        $this->assertTrue(file_exists($this->path . '/' . $envFile));
         $arrayAdapter       = new ArrayMultiAdapter('.');
-        $this->assertTrue($envFileExists);
-        if ($envFileExists) {
-            $repository         = RepositoryBuilder::createWithNoAdapters()
-                ->addAdapter($arrayAdapter)
-                ->make();
-            $middleware         = new DecryptorMiddleware([FakeDecrypt::class, 'decrypt']);
-            Dotenvx::create($repository, $this->path, $envFile)
-                ->addMiddleware($middleware)
-                ->load();
+        $repository         = RepositoryBuilder::createWithNoAdapters()
+            ->addAdapter($arrayAdapter)
+            ->make();
+        $middleware         = new DecryptorMiddleware([FakeDecrypt::class, 'decrypt']);
+        Dotenvx::create($repository, $this->path, $envFile)
+            ->addMiddleware($middleware)
+            ->load();
 
-            // Validate values
-            $options            = $arrayAdapter->values;
-            $this->assertEquals('pdo_mysql' , $options['DB']['DRIVER']);
-            $this->assertEquals('localhost' , $options['DB']['HOST']);
-            $this->assertEquals('3306'      , $options['DB']['PORT']);
-            $this->assertEquals('username'  , $options['DB']['USER']);
-            $this->assertEquals('pa$$w0rd'  , $options['DB']['PASSWORD']);
-            $this->assertEquals('utf8mb4'   , $options['DB']['CHARSET']);
-            $this->assertTrue(in_array('primary', $options['DB']));
-        }
-    }
-
-    public function testDotenvThrowsExceptionIfUnableToLoadFile() {
-        $dotenv = Dotenvx::createMutable(__DIR__);
-
-        $this->expectException(InvalidPathException::class);
-        $this->expectExceptionMessage('Unable to read any of the environment file(s) at');
-
-        $middleware             = new DecryptorMiddleware([FakeDecrypt::class, 'decrypt']);
-        $dotenv->addMiddleware($middleware);
-        $dotenv->load();
-    }
-
-    public function testDotenvThrowsExceptionIfUnableToLoadFiles() {
-        $dotenv = Dotenvx::createMutable([__DIR__, __DIR__.'/foo/bar']);
-
-        $this->expectException(InvalidPathException::class);
-        $this->expectExceptionMessage('Unable to read any of the environment file(s) at');
-
-        $middleware             = new DecryptorMiddleware([FakeDecrypt::class, 'decrypt']);
-        $dotenv->addMiddleware($middleware);
-        $dotenv->load();
-    }
-
-    public function testDotenvThrowsExceptionWhenNoFiles() {
-        $dotenv = Dotenvx::createMutable([]);
-
-        $this->expectException(InvalidPathException::class);
-        $this->expectExceptionMessage('At least one environment file path must be provided.');
-
-        $middleware             = new DecryptorMiddleware([FakeDecrypt::class, 'decrypt']);
-        $dotenv->addMiddleware($middleware);
-        $dotenv->load();
+        // Validate values
+        $options            = $arrayAdapter->values;
+        $this->assertEquals($this->data['DB_DRIVER']    , $options['DB']['DRIVER']);
+        $this->assertEquals($this->data['DB_HOST']      , $options['DB']['HOST']);
+        $this->assertEquals($this->data['DB_PORT']      , $options['DB']['PORT']);
+        $this->assertEquals($this->data['DB_USER']      , $options['DB']['USER']);
+        $this->assertEquals($this->data['DB_PASSWORD']  , $options['DB']['PASSWORD']);
+        $this->assertEquals($this->data['DB_CHARSET']   , $options['DB']['CHARSET']);
+        $this->assertTrue(in_array($this->data['DB']    , $options['DB']));
     }
 
     public function testDotenvTriesPathsToLoad() {
@@ -146,13 +116,9 @@ class DecryptorMiddlewareTest extends Data {
         $options    = $dotenv->load();
 
         $this->assertCount(9                , $options);
-        $this->assertEquals('pdo_mysql'     , $_SERVER['DB_DRIVER']);
-        $this->assertEquals('localhost'     , $_SERVER['DB_HOST']);
-        $this->assertEquals('3306'          , $_SERVER['DB_PORT']);
-        $this->assertEquals('username'      , $_SERVER['DB_USER']);
-        $this->assertEquals('pa$$w0rd'      , $_SERVER['DB_PASSWORD']);
-        $this->assertEquals('utf8mb4'       , $_SERVER['DB_CHARSET']);
-        $this->assertEquals('with spaces'   , $_SERVER['SPACED']);
+        foreach(['DB_DRIVER', 'DB_HOST', 'DB_PORT', 'DB_USER', 'DB_PASSWORD', 'DB_CHARSET', 'SPACED'] as $key) {
+            $this->assertEquals($this->data[$key], $_SERVER[$key]);
+        }
         $this->assertEmpty($_SERVER['NULL']);
     }
 
@@ -163,7 +129,7 @@ class DecryptorMiddlewareTest extends Data {
         $options    = $dotenv->load();
         $this->assertCount(9, $options);
 
-        $dotenv = Dotenvx::createImmutable([__DIR__, $this->path]);
+        $dotenv     = Dotenvx::createImmutable([__DIR__, $this->path]);
         $dotenv->addMiddleware($middleware);
         $options    = $dotenv->load();
         $this->assertCount(0, $options);
@@ -175,13 +141,9 @@ class DecryptorMiddlewareTest extends Data {
         $dotenv->addMiddleware($middleware);
         $options    = $dotenv->safeLoad();
         $this->assertCount(9                , $options);
-        $this->assertEquals('pdo_mysql'     , $_SERVER['DB_DRIVER']);
-        $this->assertEquals('localhost'     , $_SERVER['DB_HOST']);
-        $this->assertEquals('3306'          , $_SERVER['DB_PORT']);
-        $this->assertEquals('username'      , $_SERVER['DB_USER']);
-        $this->assertEquals('pa$$w0rd'      , $_SERVER['DB_PASSWORD']);
-        $this->assertEquals('utf8mb4'       , $_SERVER['DB_CHARSET']);
-        $this->assertEquals('with spaces'   , $_SERVER['SPACED']);
+        foreach(['DB_DRIVER', 'DB_HOST', 'DB_PORT', 'DB_USER', 'DB_PASSWORD', 'DB_CHARSET', 'SPACED'] as $key) {
+            $this->assertEquals($this->data[$key], $_SERVER[$key]);
+        }
         $this->assertEmpty($_SERVER['NULL']);
     }
 
@@ -191,14 +153,10 @@ class DecryptorMiddlewareTest extends Data {
         $dotenv->addMiddleware($middleware);
         $options    = $dotenv->load();
 
-        $this->assertSame(self::DEFAULT     , $options);
-        $this->assertEquals('pdo_mysql'     , $_SERVER['DB_DRIVER']);
-        $this->assertEquals('localhost'     , $_SERVER['DB_HOST']);
-        $this->assertEquals('3306'          , $_SERVER['DB_PORT']);
-        $this->assertEquals('username'      , $_SERVER['DB_USER']);
-        $this->assertEquals('pa$$w0rd'      , $_SERVER['DB_PASSWORD']);
-        $this->assertEquals('utf8mb4'       , $_SERVER['DB_CHARSET']);
-        $this->assertEquals('with spaces'   , $_SERVER['SPACED']);
+        $this->assertSame($this->default     , $options);
+        foreach(['DB_DRIVER', 'DB_HOST', 'DB_PORT', 'DB_USER', 'DB_PASSWORD', 'DB_CHARSET', 'SPACED'] as $key) {
+            $this->assertEquals($this->data[$key], $_SERVER[$key]);
+        }
         $this->assertEmpty($_SERVER['NULL']);
     }
 
@@ -208,7 +166,7 @@ class DecryptorMiddlewareTest extends Data {
         $dotenv->addMiddleware($middleware);
         $options    = $dotenv->load();
 
-        $this->assertSame(self::DEFAULT     , $options);
+        $this->assertSame($this->default     , $options);
     }
 
     public function testDotenvLoadsEnvironmentVarsMultipleWithoutShortCircuitMode() {
@@ -218,7 +176,7 @@ class DecryptorMiddlewareTest extends Data {
         $options    = $dotenv->load();
 
         $this->assertSame(
-            self::DEFAULT + ['EG' => 'example'],
+            $this->default + ['EG' => 'example'],
             $options
         );
     }
@@ -229,13 +187,9 @@ class DecryptorMiddlewareTest extends Data {
         $dotenv->addMiddleware($middleware);
         $dotenv->load();
 
-        $this->assertEquals('pdo_mysql'     , $_SERVER['DB_DRIVER']);
-        $this->assertEquals('localhost'     , $_SERVER['DB_HOST']);
-        $this->assertEquals('3306'          , $_SERVER['DB_PORT']);
-        $this->assertEquals('username'      , $_SERVER['DB_USER']);
-        $this->assertEquals('pa$$w0rd'      , $_SERVER['DB_PASSWORD']);
-        $this->assertEquals('utf8mb4'       , $_SERVER['DB_CHARSET']);
-        $this->assertEquals('with spaces'   , $_SERVER['SPACED']);
+        foreach(['DB_DRIVER', 'DB_HOST', 'DB_PORT', 'DB_USER', 'DB_PASSWORD', 'DB_CHARSET', 'SPACED'] as $key) {
+            $this->assertEquals($this->data[$key], $_SERVER[$key]);
+        }
         $this->assertEmpty($_SERVER['NULL']);
     }
 
@@ -245,13 +199,9 @@ class DecryptorMiddlewareTest extends Data {
         $dotenv->addMiddleware($middleware);
         $dotenv->load();
 
-        $this->assertEquals('pdo_mysql'     , $_ENV['DB_DRIVER']);
-        $this->assertEquals('localhost'     , $_ENV['DB_HOST']);
-        $this->assertEquals('3306'          , $_ENV['DB_PORT']);
-        $this->assertEquals('username'      , $_ENV['DB_USER']);
-        $this->assertEquals('pa$$w0rd'      , $_ENV['DB_PASSWORD']);
-        $this->assertEquals('utf8mb4'       , $_ENV['DB_CHARSET']);
-        $this->assertEquals('with spaces'   , $_ENV['SPACED']);
+        foreach(['DB_DRIVER', 'DB_HOST', 'DB_PORT', 'DB_USER', 'DB_PASSWORD', 'DB_CHARSET', 'SPACED'] as $key) {
+            $this->assertEquals($this->data[$key], $_ENV[$key]);
+        }
         $this->assertEmpty($_ENV['NULL']);
     }
 
@@ -261,13 +211,9 @@ class DecryptorMiddlewareTest extends Data {
         $dotenv->addMiddleware($middleware);
         $dotenv->load();
 
-        $this->assertEquals('pdo_mysql'     , $_SERVER['DB_DRIVER']);
-        $this->assertEquals('localhost'     , $_SERVER['DB_HOST']);
-        $this->assertEquals('3306'          , $_SERVER['DB_PORT']);
-        $this->assertEquals('username'      , $_SERVER['DB_USER']);
-        $this->assertEquals('pa$$w0rd'      , $_SERVER['DB_PASSWORD']);
-        $this->assertEquals('utf8mb4'       , $_SERVER['DB_CHARSET']);
-        $this->assertEquals('with spaces'   , $_SERVER['SPACED']);
+        foreach(['DB_DRIVER', 'DB_HOST', 'DB_PORT', 'DB_USER', 'DB_PASSWORD', 'DB_CHARSET', 'SPACED'] as $key) {
+            $this->assertEquals($this->data[$key], $_SERVER[$key]);
+        }
         $this->assertEmpty($_SERVER['NULL']);
     }
 
@@ -280,7 +226,7 @@ class DecryptorMiddlewareTest extends Data {
         $dotenv->addMiddleware($middleware);
         $options    = $dotenv->load();
 
-        $this->assertSame(self::DEFAULT, $options);
+        $this->assertSame($this->default, $options);
     }
 
 }

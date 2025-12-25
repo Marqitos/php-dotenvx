@@ -11,6 +11,7 @@ return [
     'DB_CHARSET'        => 'utf8mb4',
     'DB'                => 'primary',
     'SPACED'            => 'with spaces',
+    'NULL'              => '',
     'ENC_DB_HOST'       => 'encrypted:kpOFCd76bsEMvgk7iJ1a7oHbQdGITAMAtUppEIBgRmUjinhWoxaKJD9Xz1SqKEwSGAlnuWhXksv1',
     'ENC_DB_PORT'       => 'encrypted:k4hknNltlTjry3LFPsM3dtHkQdfJhWRRCK+X21JE6xAjg0xI3bT3rSXfJ9rdesIXWxYFzw==',
     'ENC_DB_USER'       => 'encrypted:XZA6xt1uXF1OdDrROuvC5+zVD/3OwXaj9dgPGdkF0QFUaNfCFTcCsmJl7V5e9I7w39egprAOXJg=',
